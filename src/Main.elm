@@ -4,16 +4,17 @@ import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Http
+import Json.Decode exposing (Decoder, field, string)
 import List
 import String
-
 
 
 -- MAIN
 
 
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element { init = init, update = update, view = view, subscriptions = subscriptions }
 
 
 
@@ -84,9 +85,9 @@ type alias Model =
     { che_base_url : String, filter_text : String }
 
 
-init : Model
-init =
-    Model default_che_base_url ""
+init : () -> (Model, Cmd Msg)
+init _ =
+    (Model default_che_base_url "", Cmd.none)
 
 
 
@@ -98,14 +99,21 @@ type Msg
     | ChangeFilterText String
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         ChangeCheUrl new_che_base_url ->
-            { model | che_base_url = new_che_base_url }
+            ({ model | che_base_url = new_che_base_url }, Cmd.none)
         ChangeFilterText new_filter_text ->
-            { model | filter_text = new_filter_text }
+            ({ model | filter_text = new_filter_text }, Cmd.none)
 
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 
 
 -- VIEW
