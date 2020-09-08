@@ -116,16 +116,20 @@ view model =
             , datalist [ id "che_base_url" ] [ option [ value openshift_base_url ] [] ]
             ]
         , div []
-            [ ul []
-                (List.map2 to_anchor (List.repeat (List.length filtered_stacks) model.che_base_url) filtered_stacks)
+            [ table []
+                [ tbody []
+                    (List.map2 to_anchor (List.repeat (List.length filtered_stacks) model.che_base_url) filtered_stacks)
+                ]
             ]
         ]
 
 
 to_anchor : String -> Stack -> Html Msg
 to_anchor che_base_url stack =
-    li []
-        [ a [ href (che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ stack.url) ] [ text stack.name ] ]
+    tr []
+        [ td [] [ a [ href (che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ stack.url), title (che_base_url ++ " で開く") ] [ text stack.name ] ]
+        , td [] [ a [ href stack.url, title "devfile" ] [ text "⚙" ] ]
+        ]
 
 
 
