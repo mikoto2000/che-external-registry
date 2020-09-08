@@ -6274,6 +6274,8 @@ var $elm$core$List$repeat = F2(
 	function (n, value) {
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
+var $elm$html$Html$table = _VirtualDom_node('table');
+var $elm$html$Html$tbody = _VirtualDom_node('tbody');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$a = _VirtualDom_node('a');
@@ -6285,27 +6287,52 @@ var $elm$html$Html$Attributes$href = function (url) {
 		'href',
 		_VirtualDom_noJavaScriptUri(url));
 };
-var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$html$Html$td = _VirtualDom_node('td');
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $author$project$Main$to_anchor = F2(
 	function (che_base_url, stack) {
 		return A2(
-			$elm$html$Html$li,
+			$elm$html$Html$tr,
 			_List_Nil,
 			_List_fromArray(
 				[
 					A2(
-					$elm$html$Html$a,
+					$elm$html$Html$td,
+					_List_Nil,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$href(che_base_url + ('/' + ($author$project$Main$che_path + ($author$project$Main$che_query_string_prefix + stack.url))))
-						]),
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href(che_base_url + ('/' + ($author$project$Main$che_path + ($author$project$Main$che_query_string_prefix + stack.url)))),
+									$elm$html$Html$Attributes$title(che_base_url + ' で開く')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(stack.name)
+								]))
+						])),
+					A2(
+					$elm$html$Html$td,
+					_List_Nil,
 					_List_fromArray(
 						[
-							$elm$html$Html$text(stack.name)
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href(stack.url),
+									$elm$html$Html$Attributes$title('devfile')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('⚙')
+								]))
 						]))
 				]));
 	});
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$view = function (model) {
 	var filtered_stacks = A2(
@@ -6387,16 +6414,22 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						A2(
-						$elm$html$Html$ul,
+						$elm$html$Html$table,
 						_List_Nil,
-						A3(
-							$elm$core$List$map2,
-							$author$project$Main$to_anchor,
-							A2(
-								$elm$core$List$repeat,
-								$elm$core$List$length(filtered_stacks),
-								model.che_base_url),
-							filtered_stacks))
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$tbody,
+								_List_Nil,
+								A3(
+									$elm$core$List$map2,
+									$author$project$Main$to_anchor,
+									A2(
+										$elm$core$List$repeat,
+										$elm$core$List$length(filtered_stacks),
+										model.che_base_url),
+									filtered_stacks))
+							]))
 					]))
 			]));
 };
