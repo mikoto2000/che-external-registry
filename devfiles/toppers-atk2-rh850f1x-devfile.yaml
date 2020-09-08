@@ -1,0 +1,47 @@
+---
+apiVersion: 1.0.0
+metadata:
+  generateName: toppers-atk2-rh850f1x-
+projects:
+  - name: toppers-atk2-rh850f1x
+    source:
+      location: 'https://github.com/mikoto2000/toppers-atk2-sc1.git'
+      type: git
+components:
+  - type: chePlugin
+    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+    alias: vscode-cpptools
+  - mountSources: true
+    memoryLimit: 512Mi
+    type: dockerimage
+    image: >-
+      mikoto2000/che-toppers-kernel-build-kit:athrill-gcc-latest
+    alias: toppers-kernel-build-kit
+  - mountSources: true
+    memoryLimit: 512Mi
+    type: dockerimage
+    image: 'mikoto2000/che-athrill:rh850f1x-latest'
+    alias: athrill
+commands:
+  - name: create sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}'
+        type: exec
+        command: >-
+          mkdir ${CHE_PROJECTS_ROOT}/sample;
+          cd ${CHE_PROJECTS_ROOT}/sample;
+          ../toppers-atk2-rh850f1x/configure -T hsbrh850f1k_gcc -g /usr/local/bin/cfg
+        component: toppers-kernel-build-kit
+  - name: build sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/sample'
+        type: exec
+        command: make
+        component: toppers-kernel-build-kit
+  - name: run sample on athrill
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/sample'
+        type: exec
+        command: cp /opt/athrill/params/rh850f1x/atk2-sc1/* ./; athrill-run
+        component: athrill
+

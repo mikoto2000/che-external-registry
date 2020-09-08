@@ -1,0 +1,50 @@
+---
+apiVersion: 1.0.0
+metadata:
+  generateName: toppers-fmp3-zcu102-
+projects:
+  - name: toppers-fmp3-zcu102
+    source:
+      location: 'https://github.com/mikoto2000/toppers-fmp3.git'
+      branch: zcu102
+      type: git
+components:
+  - type: chePlugin
+    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+    alias: vscode-cpptools
+  - type: dockerimage
+    alias: toppers-kernel-build-kit
+    image: mikoto2000/che-toppers-kernel-build-kit:gcc-aarch64-linux-gnu-latest
+    memoryLimit: 512Mi
+    mountSources: true
+  - type: dockerimage
+    alias: qemu-xilinx
+    image: mikoto2000/che-qemu-xilinx:latest
+    memoryLimit: 512Mi
+    mountSources: true
+  - type: dockerimage
+    alias: gdb-multiarch
+    image: mikoto2000/che-gdb-multiarch:8.2.1-2b3
+    memoryLimit: 512Mi
+    mountSources: true
+commands:
+  - name: create sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}'
+        type: exec
+        command: "mkdir sample; cd sample; ruby ../toppers-fmp3-zcu102/configure.rb -T zcu102_arm64_gcc -w -S 'syslog.o banner.o serial.o chip_serial.o logtask.o xuartps.o'"
+        component: toppers-kernel-build-kit
+  - name: build sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/sample'
+        type: exec
+        command: make GCC_TARGET=aarch64-linux-gnu
+        component: toppers-kernel-build-kit
+  - name: run sample on qemu
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/sample'
+        type: exec
+        command: qemu-system-aarch64 -M arm-generic-fdt -nographic -serial mon:stdio -dtb /var/dts/LATEST/SINGLE_ARCH/zcu102-arm.dtb -device loader,file=./fmp,cpu-num=0 -device loader,addr=0xfd1a0104,data=0x8000000e,data-len=4
+        component: qemu-xilinx
+
+

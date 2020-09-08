@@ -1,0 +1,48 @@
+---
+apiVersion: 1.0.0
+metadata:
+  generateName: toppers-hrp3-
+projects:
+  - name: toppers-hrp3
+    source:
+      location: 'https://github.com/mikoto2000/toppers-hrp3.git'
+      type: git
+components:
+  - type: chePlugin
+    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+    alias: vscode-cpptools
+  - type: dockerimage
+    alias: toppers-kernel-build-kit
+    image: mikoto2000/che-toppers-kernel-build-kit:che-zig-with-gcc-arm-none-eabi-latest
+    memoryLimit: 512Mi
+    mountSources: true
+  - type: dockerimage
+    alias: qemu-xilinx
+    image: mikoto2000/che-qemu-xilinx:latest
+    memoryLimit: 512Mi
+    mountSources: true
+  - type: dockerimage
+    alias: gdb-multiarch
+    image: mikoto2000/che-gdb-multiarch:8.2.1-2b3
+    memoryLimit: 512Mi
+    mountSources: true
+commands:
+  - name: create sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}'
+        type: exec
+        command: "mkdir sample; cd sample; ruby ../toppers-hrp3/configure.rb -T zybo_z7_gcc"
+        component: toppers-kernel-build-kit
+  - name: build sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/sample'
+        type: exec
+        command: make
+        component: toppers-kernel-build-kit
+  - name: run sample on qemu
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/sample'
+        type: exec
+        command: qemu-system-aarch64 -M arm-generic-fdt-7series -dtb /var/dts/zynq-zybo.dtb -serial null -serial mon:stdio -nographic -kernel ./hrp
+        component: qemu-xilinx
+

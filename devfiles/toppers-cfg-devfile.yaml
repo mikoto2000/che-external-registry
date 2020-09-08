@@ -1,0 +1,19 @@
+---
+apiVersion: 1.0.0
+metadata:
+  generateName: toppers-cfg-
+projects:
+  - name: cfg
+    source:
+      location: 'https://github.com/mitsut/cfg.git'
+      type: git
+components:
+  - type: chePlugin
+    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+    alias: vscode-cpptools
+  - type: dockerimage
+    alias: toppers-cfg-build-kit
+    image: mikoto2000/che-toppers-cfg-build-kit:latest
+    memoryLimit: 512Mi
+    mountSources: true
+

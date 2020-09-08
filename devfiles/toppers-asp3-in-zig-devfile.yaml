@@ -1,0 +1,55 @@
+---
+apiVersion: 1.0.0
+metadata:
+  generateName: asp3-in-zig-
+projects:
+  - name: asp3-in-zig
+    source:
+      location: 'https://github.com/toppers/asp3_in_zig.git'
+      type: git
+components:
+  - type: chePlugin
+    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+    alias: vscode-cpptools
+  - mountSources: true
+    memoryLimit: 512Mi
+    type: dockerimage
+    image: >-
+      mikoto2000/che-toppers-kernel-build-kit:che-zig-with-gcc-arm-none-eabi-latest
+    alias: toppers-kernel-build-kit
+  - mountSources: true
+    memoryLimit: 512Mi
+    type: dockerimage
+    image: 'mikoto2000/che-qemu-system-arm:latest'
+    alias: qemu-system-arm
+  - type: dockerimage
+    alias: gdb-multiarch
+    image: mikoto2000/che-gdb-multiarch:8.2.1-2b3
+    memoryLimit: 512Mi
+    mountSources: true
+commands:
+  - name: create sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}'
+        type: exec
+        command: >-
+          mkdir ${CHE_PROJECTS_ROOT}/asp3-in-zig/OBJ-ARM; cd
+          ${CHE_PROJECTS_ROOT}/asp3-in-zig/OBJ-ARM; ../configure.rb -G
+          /opt/tecsgen-1.7.0/tecsgen/tecsgen.rb -T ct11mpcore_gcc -O
+          '-DTOPPERS_USE_QEMU'
+        component: toppers-kernel-build-kit
+  - name: build sample
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/asp3-in-zig/OBJ-ARM'
+        type: exec
+        command: make
+        component: toppers-kernel-build-kit
+  - name: run sample on qemu
+    actions:
+      - workdir: '${CHE_PROJECTS_ROOT}/asp3-in-zig/OBJ-ARM'
+        type: exec
+        command: >-
+          qemu-system-arm -M realview-eb-mpcore -semihosting -m 128M -nographic
+          -kernel asp
+        component: qemu-system-arm
+
