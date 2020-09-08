@@ -5,43 +5,43 @@
   },
   {
     "name": "toppers-asp3-in-zig",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-asp3-in-zig-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-asp3-in-zig-devfile.yaml"
   },
   {
     "name": "toppers-atk2-rh850f1x",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-atk2-rh850f1x-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-atk2-rh850f1x-devfile.yaml"
   },
   {
     "name": "toppers-atk2-zcu102",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-atk2-zcu102-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-atk2-zcu102-devfile.yaml"
   },
   {
     "name": "toppers-fmp3-zybo-z7",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-fmp3-zybo-z7-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-fmp3-zybo-z7-devfile.yaml"
   },
   {
     "name": "toppers-fmp3-zcu102",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-fmp3-zcu102-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-fmp3-zcu102-devfile.yaml"
   },
   {
     "name": "toppers-hrp3",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-hrp3-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-hrp3-devfile.yaml"
   },
   {
     "name": "toppers-hrmp3",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-hrmp3-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-hrmp3-devfile.yaml"
   },
   {
     "name": "toppers-cfg",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/toppers-cfg-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-cfg-devfile.yaml"
   },
   {
     "name": "ruby",
-    "url": "/ruby-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/ruby-devfile.yaml"
   },
   {
     "name": "elm",
-    "url": "https://mikoto2000.github.io/che-external-registry/plugins/elm-devfile.yaml"
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/elm-devfile.yaml"
   }
 ]
 
