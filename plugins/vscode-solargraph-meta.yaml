@@ -1,0 +1,19 @@
+apiVersion: v2
+publisher: mikoto2000
+name: vscode-solargraph
+version: 0.21.1
+type: VS Code extension
+displayName: Language Support for Ruby
+title: Language Support for Ruby
+description: Ruby
+icon: https://www.eclipse.org/che/images/logo-eclipseche.svg
+repository: https://github.com/castwide/vscode-solargraph
+category: Language
+firstPublicationDate: "2020-8-20"
+spec:
+  containers:
+  - image: mikoto2000/che-remote-plugin-solargraph:2.7.1-alpine3.12
+    name: vscode-solargraph
+    memoryLimit: "1500Mi"
+  extensions:
+  - https://marketplace.visualstudio.com/_apis/public/gallery/publishers/Castwide/vsextensions/solargraph/0.21.1/vspackage

@@ -1,0 +1,19 @@
+metadata:
+  name: ruby
+projects:
+  - name: binp
+    source:
+      location: 'git@github.com:mikoto2000/binp.git'
+      type: git
+      branch: master
+components:
+  - type: chePlugin
+    reference: >-
+      https://mikoto2000.github.io/che-external-registry/plugins/vscode-solargraph-meta.yaml
+    alias: vscode-solargraph
+  - mountSources: true
+    memoryLimit: 512Mi
+    type: dockerimage
+    image: 'mikoto2000/che-ruby:2.7.1-alpine3.12'
+    alias: ruby
+apiVersion: 1.0.0
