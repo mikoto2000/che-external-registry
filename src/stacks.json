@@ -42,6 +42,10 @@
   {
     "name": "elm",
     "url": "https://mikoto2000.github.io/che-external-registry/plugins/elm-devfile.yaml"
+  },
+  {
+    "name": "node15",
+    "url": "/node15-devfile.yaml"
   }
 ]
 
