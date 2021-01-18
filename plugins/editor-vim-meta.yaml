@@ -1,0 +1,28 @@
+apiVersion: v2
+publisher: mikoto2000
+name: vim
+version: latest
+type: Che Editor
+displayName: vim
+title: Vim
+description: Vim Editor for Eclipse Che
+icon: https://raw.githubusercontent.com/theia-ide/theia/master/logo/theia-logo-no-text-black.svg?sanitize=true
+category: Editor
+repository: https://github.com/mikoto2000/che-editor-vim/
+firstPublicationDate: '2021-1-18'
+spec:
+  endpoints:
+    - name: vim
+      public: true
+      targetPort: 3100
+      attributes:
+        protocol: http
+        type: ide
+  containers:
+    - name: vim
+      image: "mikoto2000/che-editor-vim:dev"
+      mountSources: true
+      ports:
+        - exposedPort: 3100
+      memoryLimit: 512M
+
