@@ -1,6 +1,6 @@
 apiVersion: 1.0.0
 metadata:
-  generatedName: athrill-rh850f1x-devkit-
+  generateName: athrill-rh850f1x-devkit-
 projects:
   - name: athrill-core
     source:

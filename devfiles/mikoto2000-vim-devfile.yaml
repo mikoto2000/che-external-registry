@@ -1,6 +1,6 @@
 apiVersion: 1.0.0
 metadata:
-  generatedName: mikoto2000-vim-
+  generateName: mikoto2000-vim-
 projects:
   - name: dotvim
     source:
