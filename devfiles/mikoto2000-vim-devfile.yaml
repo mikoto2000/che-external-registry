@@ -1,0 +1,16 @@
+apiVersion: 1.0.0
+metadata:
+  generatedName: mikoto2000-vim-
+projects:
+  - name: dotvim
+    source:
+      location: 'https://github.com/mikoto2000/dotvim.git'
+      type: git
+      branch: master
+    clonePath: .vim
+components:
+  - id: eclipse/che-machine-exec-plugin/latest
+    type: chePlugin
+  - type: cheEditor
+    reference: 'https://mikoto2000.github.io/che-external-registry/plugins/editor-vim-meta.yaml'
+    alias: vim
