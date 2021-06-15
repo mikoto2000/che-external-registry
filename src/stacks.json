@@ -52,8 +52,8 @@
     "url": "https://mikoto2000.github.io/che-external-registry/devfiles/node15-devfile.yaml"
   },
   {
-    "name": "mikoto2000-vim",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/mikoto2000-vim-devfile.yaml"
+    "name": "vim",
+    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/vim-devfile.yaml"
   }
 ]
 
