@@ -15,14 +15,22 @@ Eclipse Che が提供していないスタックを提供することを目的�
 ## elm reactor での動作確認:
 
 ```sh
-elm reactor
+npm build
+npm package
+npm start
 ```
 
-`http://localhost:8008` へ接続し、 `src` -> `Main.elm` と選択する。
+`http://localhost:8000` へ接続し、 `dist` -> `index.html` と選択する。
 
 
 ## デプロイ
 
-1. `elm make src/Main.elm` で `./index.html` を生成する
-2. `gh-pages` ブランチのルートディレクトリに、 `./index.html` と `./src/stacks.json` をコピーし、コミットする
+1. `npm build` で `./dist/index.html` を生成する
+2. `./src` から `./dist` へ、必要なファイルをコピー
+   ```sh
+   cp ./src/index.html ./dist/index.html
+   cp ./src/stacks.json ./dist/stacks.json
+   cp -r ./src/devfiles ./src/plugins ./dist
+   ```
+2. `gh-pages` ブランチのルートディレクトリに、 `./dist` ディレクトリ内のファイルをコピーする
 

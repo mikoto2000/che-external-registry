@@ -1,0 +1,25 @@
+{
+  "name": "che-external-registry",
+  "version": "1.0.0",
+  "description": "[https://mikoto2000.github.io/che-external-registry](https://mikoto2000.github.io/che-external-registry) のソースリポジトリ。",
+  "main": "index.js",
+  "scripts": {
+    "start": "elm reactor",
+    "build": "elm make --output=./dist/index.js",
+    "package": "./package.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikoto2000/che-external-registry.git"
+  },
+  "author": "mikoto2000",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikoto2000/che-external-registry/issues"
+  },
+  "homepage": "https://github.com/mikoto2000/che-external-registry#readme",
+  "devDependencies": {
+    "elm": "^0.19.1-5"
+  }
+}
