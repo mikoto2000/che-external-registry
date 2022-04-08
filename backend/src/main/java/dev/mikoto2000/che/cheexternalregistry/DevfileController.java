@@ -26,7 +26,7 @@ public class DevfileController {
     private Cache<String, String> map = CacheBuilder.newBuilder()
             .concurrencyLevel(CONCURRENCY_LEVEL)
             .maximumSize(MAXIMUM_SIZE)
-            .expireAfterAccess(EXPIRE_AFTER_ACCESS, TimeUnit.SECONDS)
+            .expireAfterWrite(EXPIRE_AFTER_ACCESS, TimeUnit.SECONDS)
             .<String, String>build();
 
     @GetMapping(path = "/{key}")

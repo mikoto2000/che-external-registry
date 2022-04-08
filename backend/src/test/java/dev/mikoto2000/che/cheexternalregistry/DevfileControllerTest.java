@@ -35,12 +35,15 @@ class DevfileControllerTests {
 				.andExpect(content().string("KEY"))
 				.andReturn();
 
+		Thread.sleep(5000);
+
+		// 5 秒後には KEY に対する値が存在する
 		this.mockMvc.perform(get("/KEY"))
 				.andExpect(status().isOk())
 				.andExpect(content().string("Hello, World!"))
 				.andReturn();
 
-		Thread.sleep(10000);
+		Thread.sleep(5000);
 
 		// 10 秒たったらもう存在しない
 		this.mockMvc.perform(get("/KEY"))
