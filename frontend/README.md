@@ -25,12 +25,15 @@ npm start
 
 ## デプロイ
 
-1. `npm build` で `./dist/index.html` を生成する
+1. `npm run build` で `./dist/index.html` を生成する
 2. `./src` から `./dist` へ、必要なファイルをコピー
    ```sh
    cp ./src/index.html ./dist/index.html
    cp ./src/stacks.json ./dist/stacks.json
    cp -r ./src/devfiles ./src/plugins ./dist
    ```
-2. `gh-pages` ブランチのルートディレクトリに、 `./dist` ディレクトリ内のファイルをコピーする
+3. `/frontend/dist` ディレクトリ内のファイルを `/backend/src/main/resources/static` 内にコピーする
+   ```sh
+   cp -r ./dist/* ../backend/src/main/resources/static
+   ```
 
