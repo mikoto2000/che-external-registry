@@ -72,6 +72,7 @@ type Msg
     | ChangeFilterText String
     | GotStacks (Result Http.Error (List Stack))
     | EditDevfile String
+    | ChangeDevfileContent String
     | GotDevfileContent (Result Http.Error String)
     | SendDevfile String String
     | OpenChe (Result Http.Error String)
@@ -88,6 +89,9 @@ update msg model =
 
         EditDevfile devfile_url ->
             ( model, get_devfile_content devfile_url )
+
+        ChangeDevfileContent new_devfile_content ->
+            ( { model | devfile_content = new_devfile_content }, Cmd.none )
 
         SendDevfile devfile_content che_base_url ->
             ( model, send_devfile_content devfile_content che_base_url )
@@ -157,7 +161,7 @@ view model =
                 ]
             ]
         , div []
-            [ textarea [ id "devfile" ] [ text model.devfile_content ]
+            [ textarea [ id "devfile", onInput ChangeDevfileContent ] [ text model.devfile_content ]
             , button [ onClick (SendDevfile model.devfile_content model.che_base_url ) ] [ text "Workspace 作成" ] ]
         ]
 
