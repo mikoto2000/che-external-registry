@@ -161,7 +161,7 @@ view model =
                 ]
             ]
         , div []
-            [ textarea [ id "devfile", onInput ChangeDevfileContent ] [ text model.devfile_content ]
+            [ textarea [ id "devfile", value model.devfile_content, onInput ChangeDevfileContent ] [ ]
             , button [ onClick (SendDevfile model.devfile_content model.che_base_url ) ] [ text "Workspace 作成" ] ]
         ]
 
