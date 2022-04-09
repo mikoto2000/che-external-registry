@@ -29,7 +29,7 @@ public class DevfileController {
             .expireAfterWrite(EXPIRE_AFTER_ACCESS, TimeUnit.SECONDS)
             .<String, String>build();
 
-    @GetMapping(path = "/{key}")
+    @GetMapping(path = "/tempfiles/{key}")
     @ResponseBody
     public String getDevfile(@PathVariable String key) {
         String devfile = map.getIfPresent(key);
@@ -41,7 +41,7 @@ public class DevfileController {
         return devfile;
     }
 
-    @PostMapping(path = "/{key}")
+    @PostMapping(path = "/tempfiles/{key}")
     @ResponseBody
     public String postDevfile(@PathVariable String key, @RequestBody String body) {
         map.put(key, body);

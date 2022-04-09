@@ -28,7 +28,7 @@ class DevfileControllerTests {
 
 	@Test
 	public void getPostDevFile() throws Exception {
-		this.mockMvc.perform(post("/KEY")
+		this.mockMvc.perform(post("/tempfiles/KEY")
 					.contentType(MediaType.TEXT_PLAIN)
 					.content("Hello, World!"))
 				.andExpect(status().isOk())
@@ -38,7 +38,7 @@ class DevfileControllerTests {
 		Thread.sleep(5000);
 
 		// 5 秒後には KEY に対する値が存在する
-		this.mockMvc.perform(get("/KEY"))
+		this.mockMvc.perform(get("/tempfiles/KEY"))
 				.andExpect(status().isOk())
 				.andExpect(content().string("Hello, World!"))
 				.andReturn();
@@ -46,7 +46,7 @@ class DevfileControllerTests {
 		Thread.sleep(5000);
 
 		// 10 秒たったらもう存在しない
-		this.mockMvc.perform(get("/KEY"))
+		this.mockMvc.perform(get("/tempfiles/KEY"))
 				.andExpect(status().isOk())
 				.andExpect(content().string("devfile not found."))
 				.andReturn();
