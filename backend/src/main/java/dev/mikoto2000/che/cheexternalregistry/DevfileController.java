@@ -19,7 +19,7 @@ public class DevfileController {
 
     private static final int CONCURRENCY_LEVEL = 1;
     private static final int MAXIMUM_SIZE = 10;
-    private static final int EXPIRE_AFTER_ACCESS = 10;
+    private static final int EXPIRE_AFTER_ACCESS = 300;
 
     private static final String MESSAGE_DEVFILE_NOT_FOUND = "devfile not found.";
 

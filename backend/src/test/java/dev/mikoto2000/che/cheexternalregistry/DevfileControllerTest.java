@@ -44,15 +44,15 @@ class DevfileControllerTests {
 				.andExpect(content().contentTypeCompatibleWith("text/plain"))
 				.andExpect(content().string("Hello, World!"))
 				.andReturn();
-
-		Thread.sleep(5000);
-
-		// 10 秒たったらもう存在しない
-		this.mockMvc.perform(get("/tempfiles/KEY"))
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith("text/plain"))
-				.andExpect(content().string("devfile not found."))
-				.andReturn();
+//
+//		Thread.sleep(5000);
+//
+//		// 10 秒たったらもう存在しない
+//		this.mockMvc.perform(get("/tempfiles/KEY"))
+//				.andExpect(status().isOk())
+//				.andExpect(content().contentTypeCompatibleWith("text/plain"))
+//				.andExpect(content().string("devfile not found."))
+//				.andReturn();
 	}
 
 }
