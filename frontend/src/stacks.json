@@ -1,59 +1,59 @@
 [
   {
     "name": "athrill-rh850f1x-devkit",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/athrill-rh850f1x-devkit.yaml"
+    "url": "/devfiles/athrill-rh850f1x-devkit.yaml"
   },
   {
     "name": "toppers-asp3",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-asp3-devfile.yaml"
+    "url": "/devfiles/toppers-asp3-devfile.yaml"
   },
   {
     "name": "toppers-asp3-in-zig",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-asp3-in-zig-devfile.yaml"
+    "url": "/devfiles/toppers-asp3-in-zig-devfile.yaml"
   },
   {
     "name": "toppers-atk2-rh850f1x",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-atk2-rh850f1x-devfile.yaml"
+    "url": "/devfiles/toppers-atk2-rh850f1x-devfile.yaml"
   },
   {
     "name": "toppers-atk2-zcu102",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-atk2-zcu102-devfile.yaml"
+    "url": "/devfiles/toppers-atk2-zcu102-devfile.yaml"
   },
   {
     "name": "toppers-fmp3-zybo-z7",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-fmp3-zybo-z7-devfile.yaml"
+    "url": "/devfiles/toppers-fmp3-zybo-z7-devfile.yaml"
   },
   {
     "name": "toppers-fmp3-zcu102",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-fmp3-zcu102-devfile.yaml"
+    "url": "/devfiles/toppers-fmp3-zcu102-devfile.yaml"
   },
   {
     "name": "toppers-hrp3",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-hrp3-devfile.yaml"
+    "url": "/devfiles/toppers-hrp3-devfile.yaml"
   },
   {
     "name": "toppers-hrmp3",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-hrmp3-devfile.yaml"
+    "url": "/devfiles/toppers-hrmp3-devfile.yaml"
   },
   {
     "name": "toppers-cfg",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/toppers-cfg-devfile.yaml"
+    "url": "/devfiles/toppers-cfg-devfile.yaml"
   },
   {
     "name": "ruby",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/ruby-devfile.yaml"
+    "url": "/devfiles/ruby-devfile.yaml"
   },
   {
     "name": "elm",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/elm-devfile.yaml"
+    "url": "/devfiles/elm-devfile.yaml"
   },
   {
     "name": "node15",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/node15-devfile.yaml"
+    "url": "/devfiles/node15-devfile.yaml"
   },
   {
     "name": "vim",
-    "url": "https://mikoto2000.github.io/che-external-registry/devfiles/vim-devfile.yaml"
+    "url": "/devfiles/vim-devfile.yaml"
   }
 ]
 
