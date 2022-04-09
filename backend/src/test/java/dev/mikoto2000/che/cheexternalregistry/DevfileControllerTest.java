@@ -32,6 +32,7 @@ class DevfileControllerTests {
 					.contentType(MediaType.TEXT_PLAIN)
 					.content("Hello, World!"))
 				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith("text/plain"))
 				.andExpect(content().string("KEY"))
 				.andReturn();
 
@@ -40,6 +41,7 @@ class DevfileControllerTests {
 		// 5 秒後には KEY に対する値が存在する
 		this.mockMvc.perform(get("/tempfiles/KEY"))
 				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith("text/plain"))
 				.andExpect(content().string("Hello, World!"))
 				.andReturn();
 
@@ -48,6 +50,7 @@ class DevfileControllerTests {
 		// 10 秒たったらもう存在しない
 		this.mockMvc.perform(get("/tempfiles/KEY"))
 				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith("text/plain"))
 				.andExpect(content().string("devfile not found."))
 				.andReturn();
 	}
