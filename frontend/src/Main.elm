@@ -1,6 +1,7 @@
 module Main exposing (Model, Msg(..), Stack, default_che_base_url, init, main, openshift_base_url, to_table_column, update, view)
 
 import Browser
+import Browser.Navigation
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
@@ -9,6 +10,7 @@ import Json.Decode exposing (Decoder, field, list, map2, string)
 import List
 import String
 
+import SHA512
 
 
 -- MAIN
@@ -49,15 +51,16 @@ type alias Stack =
 
 
 type alias Model =
-    { che_base_url : String
+    { location_origin : String
+    , che_base_url : String
     , filter_text : String
     , devfile_content : String
     , stacks : List Stack }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Model default_che_base_url "" "" [], get_stacks )
+init : String -> ( Model, Cmd Msg )
+init locationOrigin =
+    ( Model locationOrigin default_che_base_url "" "" [], get_stacks )
 
 
 
@@ -70,6 +73,8 @@ type Msg
     | GotStacks (Result Http.Error (List Stack))
     | EditDevfile String
     | GotDevfileContent (Result Http.Error String)
+    | SendDevfile String String
+    | OpenChe (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -83,6 +88,20 @@ update msg model =
 
         EditDevfile devfile_url ->
             ( model, get_devfile_content devfile_url )
+
+        SendDevfile devfile_content che_base_url ->
+            ( model, send_devfile_content devfile_content che_base_url )
+
+        OpenChe result ->
+            case result of
+                Ok sha256 ->
+                    let
+                        url = model.che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ model.location_origin ++ "/tempfiles/" ++ sha256
+                    in
+                        ( model, Browser.Navigation.load url )
+
+                Err _ ->
+                    ( model, Cmd.none )
 
         GotDevfileContent result ->
             case result of
@@ -138,8 +157,8 @@ view model =
                 ]
             ]
         , div []
-            [ textarea [ id "devfile" ]
-            [ text model.devfile_content ] ]
+            [ textarea [ id "devfile" ] [ text model.devfile_content ]
+            , button [ onClick (SendDevfile model.devfile_content model.che_base_url ) ] [ text "Workspace 作成" ] ]
         ]
 
 
@@ -162,6 +181,21 @@ get_devfile_content url =
         , expect = Http.expectString GotDevfileContent
         }
 
+send_devfile_content : String -> String -> Cmd Msg
+send_devfile_content devfile_content che_base_url =
+    let
+        sha512 =
+            devfile_content
+                |> SHA512.fromString
+                |> SHA512.toHex
+        url = "/tempfiles/" ++ sha512
+        body = Http.stringBody "text/plain" devfile_content
+    in
+        Http.post
+            { url = url
+            , body = body
+            , expect = Http.expectString OpenChe
+            }
 
 get_stacks : Cmd Msg
 get_stacks =
