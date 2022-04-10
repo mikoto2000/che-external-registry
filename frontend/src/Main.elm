@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), Stack, default_che_base_url, init, main, openshift_base_url, to_table_column, update, view)
+port module Main exposing (Model, Msg(..), Stack, default_che_base_url, init, main, openshift_base_url, to_table_column, update, view, sendDevfileContentToMonaco)
 
 import Browser
 import Browser.Navigation
@@ -19,6 +19,11 @@ import SHA512
 main =
     Browser.element { init = init, update = update, view = view, subscriptions = subscriptions }
 
+
+-- PORT
+
+port sendDevfileContentToMonaco: String -> Cmd msg
+port sendDevfileContentToElmModel: (String -> msg) -> Sub msg
 
 
 -- MODEL
@@ -110,7 +115,7 @@ update msg model =
         GotDevfileContent result ->
             case result of
                 Ok got_devfile_content ->
-                    ( { model | devfile_content = got_devfile_content }, Cmd.none )
+                    ( { model | devfile_content = got_devfile_content }, sendDevfileContentToMonaco got_devfile_content )
 
                 Err _ ->
                     ( { model | devfile_content = "devfile 取得に失敗しました。" }, Cmd.none )
@@ -130,7 +135,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    sendDevfileContentToElmModel ChangeDevfileContent
 
 
 
@@ -161,7 +166,7 @@ view model =
                 ]
             ]
         , div [ id "devfile-area" ]
-            [ textarea [ id "devfile", value model.devfile_content, onInput ChangeDevfileContent ] [ ] ]
+            [ div [ id "devfile" ] [ ] ]
         , div []
             [ button [ onClick (SendDevfile model.devfile_content model.che_base_url ) ] [ text "Workspace 作成" ] ]
         ]
