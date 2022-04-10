@@ -2,13 +2,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Che External Registry</title>
-  <script src="./index.js"></script>
+  <link rel="stylesheet" href="./main.css" />
+
 </head>
 
 <body>
   <div id="app"></div>
+  <script src="./index.js"></script>
   <script>
   var app = Elm.Main.init({
+    flags: location.origin,
     node: document.getElementById('app')
   });
   </script>

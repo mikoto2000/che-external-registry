@@ -1,36 +1,27 @@
 # che-external-registry
 
-[https://mikoto2000.github.io/che-external-registry](https://mikoto2000.github.io/che-external-registry) のソースリポジトリ。
-
-Eclipse Che が提供していないスタックを提供することを目的としたサイト。
-
-## サイトの使い方
-
-1. `Che URL` に利用したい Eclipse Che サービスの URL を入力
-2. スタック名が記載されたリンクをクリック
-    - リンクをクリックすると、 `Che URL` に入力したサービスでスタックを立ち上げる
-    - `Filter` に文字列を入力することで、スタックの絞り込み検索が可能
+[https://che-external-registry.herokuapp.com/index.html](https://che-external-registry.herokuapp.com/index.html)
 
 
-## elm reactor での動作確認:
+## Development:
 
 ```sh
-npm build
-npm package
-npm start
+docker run -it --rm --name cer -v "$(pwd):/work" --workdir /work -v "$HOME/.m2:/root/.m2" -v "/var/run/docker.sock:/var/run/docker.sock" -p "8080:8080" mikoto2000/che-external-registry-buildkit:latest
 ```
 
-`http://localhost:8000` へ接続し、 `dist` -> `index.html` と選択する。
+License:
+--------
+
+Copyright (C) 2022 mikoto2000
+
+This software is released under the MIT License, see LICENSE
+
+このソフトウェアは MIT ライセンスの下で公開されています。 LICENSE を参照してください。
 
 
-## デプロイ
+Author:
+-------
 
-1. `npm build` で `./dist/index.html` を生成する
-2. `./src` から `./dist` へ、必要なファイルをコピー
-   ```sh
-   cp ./src/index.html ./dist/index.html
-   cp ./src/stacks.json ./dist/stacks.json
-   cp -r ./src/devfiles ./src/plugins ./dist
-   ```
-2. `gh-pages` ブランチのルートディレクトリに、 `./dist` ディレクトリ内のファイルをコピーする
+mikoto2000 <mikoto2000@gmail.com>
+
 
