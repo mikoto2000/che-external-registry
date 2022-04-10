@@ -12,10 +12,14 @@ async function init() {
     node: document.getElementById('app')
   });
 
-  monaco.editor.create(document.getElementById('devfile'), {
+  const editor = monaco.editor.create(document.getElementById('devfile'), {
     value: "",
     language: 'yaml',
       automaticLayout: true
+  });
+
+  app.ports.sendDevfileContentToMonaco.subscribe(function(devfileContent) {
+      editor.getModel().setValue(devfileContent);
   });
 }
 
