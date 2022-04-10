@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# frontend のビルド成果物を持ってくるので Git では管理しない
+src/main/resources/static
+
 ### STS ###
 .apt_generated
 .classpath
