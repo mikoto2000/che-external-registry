@@ -42,6 +42,10 @@ module.exports = (env, argv) => {
                     to: path.join(distPath, 'plugins')
                 },
                 {
+                    from: path.join(srcPath, 'schemas'),
+                    to: path.join(distPath, 'schemas')
+                },
+                {
                     from: path.join(srcPath, 'stacks.json'),
                     to: path.join(distPath, 'stacks.json')
                 },

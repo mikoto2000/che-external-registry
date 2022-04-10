@@ -12,10 +12,35 @@ async function init() {
     node: document.getElementById('app')
   });
 
+  const SCHEMA_URL = './schemas/devfile.json';
+
+  async function getJsonFromUri(jsonUri) {
+    const response = await fetch(jsonUri);
+    const json = await response.json();
+    return json;
+  }
+
+  const schema = await getJsonFromUri(SCHEMA_URL);
+
+  setDiagnosticsOptions({
+    enableSchemaRequest: true,
+    hover: true,
+    completion: true,
+    format: true,
+    validate: true,
+    schemas: [
+      {
+        uri: SCHEMA_URL,
+        fileMatch: ['*'],
+        schema: schema
+      }
+    ]
+  });
+
   const editor = monaco.editor.create(document.getElementById('devfile'), {
     value: "",
     language: 'yaml',
-      automaticLayout: true
+    automaticLayout: true
   });
 
   app.ports.sendDevfileContentToMonaco.subscribe((devfileContent) => {
