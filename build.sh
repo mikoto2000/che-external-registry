@@ -7,10 +7,8 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
 ## frontend のビルド・デプロイ
 cd ${SCRIPT_DIR}/frontend
-npm run build
-cp ./src/index.html ./dist/index.html
-cp ./src/stacks.json ./src/main.css ./dist/
-cp -r ./src/devfiles ./src/plugins ./dist
+npm run dev
+rm -rf ../backend/src/main/resources/static/*
 cp -r ./dist/* ../backend/src/main/resources/static
 
 
