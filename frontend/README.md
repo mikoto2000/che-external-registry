@@ -29,7 +29,7 @@ npm start
 2. `./src` から `./dist` へ、必要なファイルをコピー
    ```sh
    cp ./src/index.html ./dist/index.html
-   cp ./src/stacks.json ./dist/stacks.json
+   cp ./src/stacks.json ./src/main.css ./dist/
    cp -r ./src/devfiles ./src/plugins ./dist
    ```
 3. `/frontend/dist` ディレクトリ内のファイルを `/backend/src/main/resources/static` 内にコピーする

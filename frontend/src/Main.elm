@@ -143,7 +143,7 @@ view model =
         filtered_stacks =
             List.filter (\s -> String.contains model.filter_text s.name) model.stacks
     in
-    div []
+    div [ id "main" ]
         [ div []
             [ text "Che URL: "
             , input [ value model.che_base_url, onInput ChangeCheUrl, Html.Attributes.list "che_base_url" ] []
@@ -160,9 +160,10 @@ view model =
                     (List.map2 to_table_column (List.repeat (List.length filtered_stacks) model.che_base_url) filtered_stacks)
                 ]
             ]
+        , div [ id "devfile-area" ]
+            [ textarea [ id "devfile", value model.devfile_content, onInput ChangeDevfileContent ] [ ] ]
         , div []
-            [ textarea [ id "devfile", value model.devfile_content, onInput ChangeDevfileContent ] [ ]
-            , button [ onClick (SendDevfile model.devfile_content model.che_base_url ) ] [ text "Workspace 作成" ] ]
+            [ button [ onClick (SendDevfile model.devfile_content model.che_base_url ) ] [ text "Workspace 作成" ] ]
         ]
 
 
