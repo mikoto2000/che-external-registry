@@ -44,10 +44,6 @@
     "url": "/devfiles/ruby-devfile.yaml"
   },
   {
-    "name": "elm",
-    "url": "/devfiles/elm-devfile.yaml"
-  },
-  {
     "name": "node15",
     "url": "/devfiles/node15-devfile.yaml"
   },

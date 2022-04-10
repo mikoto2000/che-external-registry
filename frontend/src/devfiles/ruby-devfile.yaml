@@ -1,9 +1,9 @@
 metadata:
   name: ruby
 projects:
-  - name: binp
+  - name: ruby-helloworld
     source:
-      location: 'git@github.com:mikoto2000/binp.git'
+      location: 'https://github.com/mikoto2000/ruby-helloworld.git'
       type: git
       branch: master
 components:
