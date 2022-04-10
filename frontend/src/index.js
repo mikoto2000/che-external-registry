@@ -18,8 +18,13 @@ async function init() {
       automaticLayout: true
   });
 
-  app.ports.sendDevfileContentToMonaco.subscribe(function(devfileContent) {
+  app.ports.sendDevfileContentToMonaco.subscribe((devfileContent) => {
       editor.getModel().setValue(devfileContent);
+  });
+
+  editor.getModel().onDidChangeContent((event) => {
+    const devfileContent = editor.getModel().getValue();
+    app.ports.sendDevfileContentToElmModel.send(devfileContent);
   });
 }
 

@@ -23,7 +23,7 @@ main =
 -- PORT
 
 port sendDevfileContentToMonaco: String -> Cmd msg
---port sendDevfileContentToElmModel: (String -> msg) -> Sub msg
+port sendDevfileContentToElmModel: (String -> msg) -> Sub msg
 
 
 -- MODEL
@@ -135,7 +135,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    sendDevfileContentToElmModel ChangeDevfileContent
 
 
 
