@@ -1,51 +1,7 @@
 [
   {
-    "name": "athrill-rh850f1x-devkit",
-    "url": "/devfiles/athrill-rh850f1x-devkit.yaml"
-  },
-  {
-    "name": "toppers-asp3",
-    "url": "/devfiles/toppers-asp3-devfile.yaml"
-  },
-  {
-    "name": "toppers-asp3-in-zig",
-    "url": "/devfiles/toppers-asp3-in-zig-devfile.yaml"
-  },
-  {
-    "name": "toppers-atk2-rh850f1x",
-    "url": "/devfiles/toppers-atk2-rh850f1x-devfile.yaml"
-  },
-  {
-    "name": "toppers-atk2-zcu102",
-    "url": "/devfiles/toppers-atk2-zcu102-devfile.yaml"
-  },
-  {
-    "name": "toppers-fmp3-zybo-z7",
-    "url": "/devfiles/toppers-fmp3-zybo-z7-devfile.yaml"
-  },
-  {
-    "name": "toppers-fmp3-zcu102",
-    "url": "/devfiles/toppers-fmp3-zcu102-devfile.yaml"
-  },
-  {
-    "name": "toppers-hrp3",
-    "url": "/devfiles/toppers-hrp3-devfile.yaml"
-  },
-  {
-    "name": "toppers-hrmp3",
-    "url": "/devfiles/toppers-hrmp3-devfile.yaml"
-  },
-  {
-    "name": "toppers-cfg",
-    "url": "/devfiles/toppers-cfg-devfile.yaml"
-  },
-  {
     "name": "ruby",
     "url": "/devfiles/ruby-devfile.yaml"
-  },
-  {
-    "name": "node15",
-    "url": "/devfiles/node15-devfile.yaml"
   },
   {
     "name": "vim",
