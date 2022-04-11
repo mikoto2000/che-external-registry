@@ -162,7 +162,7 @@ view model =
         , div []
             [ table []
                 [ tbody []
-                    (List.map2 to_table_column (List.repeat (List.length filtered_stacks) model.che_base_url) filtered_stacks)
+                    (List.map3 to_table_column (List.repeat (List.length filtered_stacks) model.location_origin) (List.repeat (List.length filtered_stacks) model.che_base_url) filtered_stacks)
                 ]
             ]
         , div [ id "devfile-area" ]
@@ -172,10 +172,10 @@ view model =
         ]
 
 
-to_table_column : String -> Stack -> Html Msg
-to_table_column che_base_url stack =
+to_table_column : String -> String -> Stack -> Html Msg
+to_table_column location_origin che_base_url stack =
     tr []
-        [ td [] [ a [ href (che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ stack.url), title (che_base_url ++ " で開く") ] [ text stack.name ] ]
+        [ td [] [ a [ href (che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ location_origin ++ stack.url), title (che_base_url ++ " で開く") ] [ text stack.name ] ]
         , td [] [ a [ href stack.url, title "devfile" ] [ text "⚙" ] ]
         , td [] [ a [ id "edit_button", title "devfile を編集", onClick (EditDevfile stack.url), style "cursor" "pointer"] [ text "📝" ] ]
         ]
