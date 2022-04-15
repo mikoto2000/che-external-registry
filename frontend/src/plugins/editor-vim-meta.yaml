@@ -18,6 +18,15 @@ spec:
       attributes:
         protocol: http
         type: ide
+    - name: "che-machine-exec"
+      public: true
+      targetPort: 4444
+      attributes:
+        protocol: ws
+        type: terminal
+        discoverable: false
+        secure: true
+        cookiesAuthEnabled: true
   containers:
     - name: vim
       image: "mikoto2000/che-editor-vim:dev"
@@ -25,4 +34,8 @@ spec:
       ports:
         - exposedPort: 3100
       memoryLimit: 512M
-
+    - name: che-machine-exec
+      image: "quay.io/eclipse/che-machine-exec:next"
+      ports:
+        - exposedPort: 4444
+      command: ['/go/bin/che-machine-exec', '--static', '/cloud-shell', '--url', '127.0.0.1:4444']
