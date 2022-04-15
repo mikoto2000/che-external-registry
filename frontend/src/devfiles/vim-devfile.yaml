@@ -2,8 +2,6 @@ apiVersion: 1.0.0
 metadata:
   generateName: vim-
 components:
-  - id: eclipse/che-machine-exec-plugin/latest
-    type: chePlugin
   - type: cheEditor
     reference: 'https://mikoto2000.github.io/che-external-registry/plugins/editor-vim-meta.yaml'
     alias: vim

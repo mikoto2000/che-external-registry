@@ -40,10 +40,6 @@
     "url": "/devfiles/ruby-devfile.yaml"
   },
   {
-    "name": "node15",
-    "url": "/devfiles/node15-devfile.yaml"
-  },
-  {
     "name": "vim",
     "url": "/devfiles/vim-devfile.yaml"
   }
