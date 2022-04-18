@@ -3,5 +3,5 @@ metadata:
   generateName: vim-
 components:
   - type: cheEditor
-    reference: 'https://mikoto2000.github.io/che-external-registry/plugins/editor-vim-meta.yaml'
+    reference: 'https://raw.githubusercontent.com/mikoto2000/che-external-registry/main/frontend/src/plugins/editor-vim-meta.yaml'
     alias: vim
