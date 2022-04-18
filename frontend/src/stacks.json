@@ -40,6 +40,14 @@
     "url": "/devfiles/ruby-devfile.yaml"
   },
   {
+    "name": "Java 17",
+    "url": "/devfiles/java17-devfile.yaml"
+  },
+  {
+    "name": "Node 16",
+    "url": "/devfiles/node16-devfile.yaml"
+  },
+  {
     "name": "vim",
     "url": "/devfiles/vim-devfile.yaml"
   }
