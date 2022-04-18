@@ -21,7 +21,7 @@ cd ${SCRIPT_DIR}/backend
 
 ## Docker イメージのビルド
 cd ${SCRIPT_DIR}
-docker build --no-cache -t mikoto2000/che-external-registry -f ./dockerfile/Dockerfile .
+docker build -t mikoto2000/che-external-registry -f ./dockerfile/Dockerfile .
 
 
 ## Heroku へデプロイ
