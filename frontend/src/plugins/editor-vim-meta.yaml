@@ -1,41 +1,62 @@
 apiVersion: v2
 publisher: mikoto2000
-name: vim
-version: latest
+name: che-editor-vim
+version: next
 type: Che Editor
 displayName: vim
 title: Vim
 description: Vim Editor for Eclipse Che
 icon: https://raw.githubusercontent.com/theia-ide/theia/master/logo/theia-logo-no-text-black.svg?sanitize=true
 category: Editor
-repository: https://github.com/mikoto2000/che-editor-vim/
-firstPublicationDate: '2021-1-18'
+repository: https://github.com/mikoto2000/che-editor-vim
+firstPublicationDate: 2021-1-18
+latestUpdateDate: '2022-04-20'
 spec:
   endpoints:
     - name: vim
-      public: true
       targetPort: 3100
       attributes:
-        protocol: http
         type: ide
-    - name: "che-machine-exec"
-      public: true
-      targetPort: 4444
-      attributes:
-        protocol: ws
-        type: terminal
-        discoverable: false
-        secure: true
         cookiesAuthEnabled: true
+        discoverable: false
+        urlRewriteSupported: true
+        protocol: http
+        secure: true
+      public: true
+    - name: terminal
+      targetPort: 3333
+      attributes:
+        type: collocated-terminal
+        discoverable: false
+        cookiesAuthEnabled: true
+        urlRewriteSupported: true
+        protocol: ws
+        secure: true
+      public: true
   containers:
-    - name: vim
-      image: "mikoto2000/che-editor-vim:dev"
+    - image: mikoto2000/che-editor-vim:next
       mountSources: true
+      memoryLimit: 512M
+      cpuLimit: 1500m
+      cpuRequest: 100m
+      name: vim
       ports:
         - exposedPort: 3100
-      memoryLimit: 512M
-    - name: che-machine-exec
-      image: "quay.io/eclipse/che-machine-exec:next"
+    - image: quay.io/eclipse/che-machine-exec:next
+      memoryLimit: 128Mi
+      memoryRequest: 32Mi
+      cpuLimit: 500m
+      cpuRequest: 30m
+      command:
+        - /go/bin/che-machine-exec
+        - '--static'
+        - '/cloud-shell'
+        - '--url'
+        - 127.0.0.1:3333
+        - '--idle-timeout'
+        - 15m
+      name: che-machine-exec
       ports:
-        - exposedPort: 4444
-      command: ['/go/bin/che-machine-exec', '--static', '/cloud-shell', '--url', '127.0.0.1:4444']
+        - exposedPort: 3333
+  initContainers: []
+
