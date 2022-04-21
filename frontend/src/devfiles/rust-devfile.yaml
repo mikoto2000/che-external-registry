@@ -1,0 +1,16 @@
+apiVersion: 1.0.0
+metadata:
+  generateName: rust-
+projects:
+  - name: HelloWorld-Rust
+    source:
+      location: 'https://github.com/che-samples/helloworld-rust'
+      type: git
+      branch: master
+components:
+  - type: dockerimage
+    alias: rust
+    image: 'mikoto2000/che-rust:latest'
+    memoryLimit: 512Mi
+    mountSources: true
+
