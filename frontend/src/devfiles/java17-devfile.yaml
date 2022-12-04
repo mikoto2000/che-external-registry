@@ -1,19 +1,74 @@
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: java-
+  name: java
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: java-web-spring
-    source:
-      type: git
-      location: 'https://github.com/che-samples/java-spring-petclinic'
-      commitId: 4953f87917b449a404a7f1f4e2457836b9eafbbc
+  - git:
+      remotes:
+        origin: 'https://github.com/che-samples/java-spring-petclinic'
+    name: java-web-spring
 components:
-  - type: dockerimage
-    alias: java
-    image: 'mikoto2000/che-java:17'
-    memoryLimit: 1024Mi
-    endpoints:
-      - name: 8080-tcp
-        port: 8080
-    mountSources: true
+  - container:
+      image: 'mikoto2000/che-java:17'
+      memoryLimit: 1024Mi
+      mountSources: true
+      endpoints:
+        - name: 8080-tcp
+          targetPort: 8080
+          exposure: public
+      volumeMounts:
+        - name: m2
+          path: /home/user/.m2
+      sourceMapping: /projects
+    name: java
+  - container:
+      image: 'mysql:5.7'
+      memoryLimit: 300Mi
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: ""
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "true"
+        - name: MYSQL_USER
+          value: petclinic
+        - name: MYSQL_PASSWORD
+          value: petclinic
+        - name: MYSQL_DATABASE
+          value: petclinic
+      endpoints:
+        - name: 3306-tcp
+          targetPort: 3306
+          exposure: none
+      sourceMapping: /projects
+    name: mysql
+  - name: m2
+    volume:
+      size: 1G
+      ephemeral: false
+commands:
+  - id: prepare-database
+    exec:
+      component: mysql
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: |
+        mysql -u root < ${PROJECT_SOURCE}/src/main/resources/db/mysql/user.sql && \
+        mysql -u root petclinic < ${PROJECT_SOURCE}/src/main/resources/db/mysql/schema.sql && \
+        mysql -u root petclinic < ${PROJECT_SOURCE}/src/main/resources/db/mysql/data.sql && \
+        echo "Done."
+  - id: run-with-hsqldb
+    exec:
+      component: java
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: |
+        ./mvnw spring-boot:run
+  - id: run-with-mysql
+    exec:
+      component: java
+      workingDir: ${PROJECT_SOURCE}
+      commandLine: |
+        ./mvnw spring-boot:run -Dspring-boot.run.profiles=mysql
 
