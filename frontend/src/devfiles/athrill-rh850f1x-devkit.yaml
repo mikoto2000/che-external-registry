@@ -1,91 +1,89 @@
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: athrill-rh850f1x-devkit-
+  name: athrill-rh850f1x-devkit
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: athrill-core
-    source:
-      location: 'https://github.com/toppers/athrill.git'
-      startPoint: master
-      type: git
-    clonePath: athrill/athrill
-  - name: athrill_skip_clock_bugfix_test_project
-    source:
-      location: 'https://github.com/mikoto2000/athrill_skip_clock_bugfix_test_project.git'
-      startPoint: main
-      type: git
-  - name: athrill-target
-    source:
-      location: 'https://github.com/toppers/athrill-target-rh850f1x.git'
-      startPoint: master
-      type: git
-    clonePath: athrill/athrill-target-rh850f1x
+  - git:
+      remotes:
+        origin: 'https://github.com/toppers/athrill-target-rh850f1x.git'
+    name: athrill-target-rh850f1x
+  - git:
+      remotes:
+        origin: 'https://github.com/mikoto2000/athrill_skip_clock_bugfix_test_project.git'
+    name: athrill-skip-clock-bugfix-test-project
 components:
-  - preferences:
-      C_Cpp.default.defines: '["OS_LINUX=1","CPUEMU_CLOCK_BUG_FIX=1","FIX_INTR_CPU_RCV_CLR=1"]'
-      C_Cpp.intelliSenseEngineFallback: Enabled
-      C_Cpp.clang_format_fallbackStyle: LLVM
-      C_Cpp.default.systemIncludePath: '["/usr/include/x86_64-linux-gnu"]'
-    type: chePlugin
-    reference: 'https://gist.githubusercontent.com/mikoto2000/16e6977853244c425f07cca23e5fa08e/raw/c23d27405caea6d3faa9dcc112d598323dd06afc/vscode-cpptools-meta.yaml'
-    alias: vscode-cpptools
-  - mountSources: true
-    memoryLimit: 512Mi
-    type: dockerimage
-    alias: athrill-devkit
-    image: 'mikoto2000/che-athrill-devkit:latest'
-  - mountSources: true
-    memoryLimit: 512Mi
-    type: dockerimage
-    alias: toppers-kernel-build-kit
-    image: 'mikoto2000/che-toppers-kernel-build-kit:athrill-gcc-latest'
-  - mountSources: true
-    memoryLimit: 512Mi
-    type: dockerimage
-    alias: gdb
-    image: 'mikoto2000/che-gdb-multiarch:8.2.1-2b3'
-  - id: redhat/vscode-yaml/latest
-    type: chePlugin
+  # TODO:
+  #  - preferences:
+  #      C_Cpp.default.defines: '["OS_LINUX=1","CPUEMU_CLOCK_BUG_FIX=1","FIX_INTR_CPU_RCV_CLR=1"]'
+  #      C_Cpp.intelliSenseEngineFallback: Enabled
+  #      C_Cpp.clang_format_fallbackStyle: LLVM
+  #      C_Cpp.default.systemIncludePath: '["/usr/include/x86_64-linux-gnu"]'
+  #    type: chePlugin
+  #    reference: 'https://gist.githubusercontent.com/mikoto2000/16e6977853244c425f07cca23e5fa08e/raw/c23d27405caea6d3faa9dcc112d598323dd06afc/vscode-cpptools-meta.yaml'
+  #    alias: vscode-cpptools
+  - container:
+      image: 'mikoto2000/che-athrill-devkit:latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: athrill-devkit
+  - container:
+      image: 'mikoto2000/che-toppers-kernel-build-kit:athrill-gcc-latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: toppers-kernel-build-kit
+  - container:
+      image: 'mikoto2000/che-gdb-multiarch:8.2.1-2b3'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: gdb
+  # TODO:
+  #  - id: redhat/vscode-yaml/latest
+  #    type: chePlugin
 commands:
-  - name: build athrill
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill/athrill-target-rh850f1x/build_linux'
-        type: exec
-        command: make skip_clock_bugfix=true fix_intr_cpu_rcv_clr=true
-        component: athrill-devkit
-  - name: clean athrill
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill/athrill-target-rh850f1x/build_linux'
-        type: exec
-        command: make clean
-        component: athrill-devkit
-  - name: abrex test project
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
-        type: exec
-        command: ruby ../../atk2-sc1/utils/abrex/abrex.rb ./toppers_atk2.yaml
-        component: toppers-kernel-build-kit
-  - name: build test project
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
-        type: exec
-        command: make
-        component: toppers-kernel-build-kit
-  - name: clean test project
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
-        type: exec
-        command: make clean
-        component: toppers-kernel-build-kit
-  - name: run test program
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
-        type: exec
-        command: '${CHE_PROJECTS_ROOT}/athrill/athrill-target-rh850f1x/build_linux/athrill2 -i -c1 -m memory.txt -d device_config.txt atk2-sc1'
-        component: gdb
-  - name: debug athrill with test program
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
-        type: exec
-        command: 'gdb --args ${CHE_PROJECTS_ROOT}/athrill/athrill-target-rh850f1x/build_linux/athrill2 -i -c1 -m memory.txt -d device_config.txt atk2-sc1'
-        component: gdb
+  - id: build-athrill
+    exec:
+      component: athrill-devkit
+      workingDir: '${PROJECTS_ROOT}/athrill-target-rh850f1x/build_linux'
+      commandLine: make skip_clock_bugfix=true fix_intr_cpu_rcv_clr=true
+  - id: build-athrill
+    exec:
+      component: athrill-devkit
+      workingDir: '${PROJECTS_ROOT}/athrill-target-rh850f1x/build_linux'
+      commandLine: make skip_clock_bugfix=true fix_intr_cpu_rcv_clr=true
+  - id: clean-athrill
+    exec:
+      component: athrill-devkit
+      workingDir: '${PROJECTS_ROOT}/athrill-target-rh850f1x/build_linux'
+      commandLine: make clean
+  - id: abrex-test-project
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
+      commandLine: ruby ../../atk2-sc1/utils/abrex/abrex.rb ./toppers_atk2.yaml
+  - id: build-test-project
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
+      commandLine: make
+  - id: clean-test-project
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
+      commandLine: make clean
+  - id: run-test-program
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
+      commandLine: '${PROJECTS_ROOT}/athrill-target-rh850f1x/build_linux/athrill2 -i -c1 -m memory.txt -d device_config.txt atk2-sc1'
+  - id: debug-athrill-with-test-program
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/athrill_skip_clock_bugfix_test_project/program/cyclic_task'
+      commandLine: make clean
+# TODO: サブモジュールを取得するコマンドを追加
+# TODO: 最新のビルド手順を満たすコマンドに修正
 
