@@ -1,6 +1,11 @@
 schemaVersion: 2.1.0
 metadata:
   name: toppers-hrp3
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
   - git:
       remotes:
