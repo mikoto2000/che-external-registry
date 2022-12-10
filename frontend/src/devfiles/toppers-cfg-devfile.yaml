@@ -1,19 +1,24 @@
----
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: toppers-cfg-
+  name: toppers-cfg
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: cfg
-    source:
-      location: 'https://github.com/mitsut/cfg.git'
-      type: git
+  - git:
+      remotes:
+        origin: 'https://github.com/mitsut/cfg.git'
+    name: cfg
 components:
-  - type: chePlugin
-    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
-    alias: vscode-cpptools
-  - type: dockerimage
-    alias: toppers-cfg-build-kit
-    image: mikoto2000/che-toppers-cfg-build-kit:latest
-    memoryLimit: 512Mi
-    mountSources: true
+  # TODO:
+  # - type: chePlugin
+  #   reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+  #   alias: vscode-cpptools
+  - container:
+      image: 'mikoto2000/che-toppers-cfg-build-kit:latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: toppers-cfg-build-kit
 
