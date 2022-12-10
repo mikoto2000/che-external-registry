@@ -1,7 +1,7 @@
 FROM alpine
 
 LABEL maintainer "mikoto2000 <mikoto2000@gmail.com>"
-LABEL version="20220410"
+LABEL version="20221211"
 LABEL description "che-external-registry"
 
 RUN apk update \

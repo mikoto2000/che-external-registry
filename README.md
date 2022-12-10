@@ -1,6 +1,6 @@
 # che-external-registry
 
-[https://che-external-registry.herokuapp.com/index.html](https://che-external-registry.herokuapp.com/index.html)
+[https://che-external-registry.azurewebsites.net/index.html](https://che-external-registry.azurewebsites.net/index.html)
 
 
 ## Development:

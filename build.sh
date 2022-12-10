@@ -22,12 +22,7 @@ cd ${SCRIPT_DIR}/backend
 ## Docker イメージのビルド
 cd ${SCRIPT_DIR}
 docker build -t mikoto2000/che-external-registry -f ./dockerfile/Dockerfile .
-
-
-## Heroku へデプロイ
-docker tag mikoto2000/che-external-registry registry.heroku.com/che-external-registry/web
-docker push registry.heroku.com/che-external-registry/web
-heroku container:release web
+# docker push mikoto2000/che-external-registry:latest
 
 
 # 元のディレクトリに戻る
