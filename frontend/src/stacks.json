@@ -50,10 +50,6 @@
   {
     "name": "Rust",
     "url": "/devfiles/rust-devfile.yaml"
-  },
-  {
-    "name": "vim",
-    "url": "/devfiles/vim-devfile.yaml"
   }
 ]
 
