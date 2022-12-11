@@ -1,778 +1,1658 @@
 {
-    "meta:license": [
-        " Copyright (c) 2012-2019 Red Hat, Inc.",
-        " This program and the accompanying materials are made",
-        " available under the terms of the Eclipse Public License 2.0",
-        " which is available at https://www.eclipse.org/legal/epl-2.0/",
-        " SPDX-License-Identifier: EPL-2.0",
-        " Contributors:",
-        " Red Hat, Inc. - initial API and implementation"
-    ],
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "type": "object",
-    "title": "Devfile object",
-    "description": "This schema describes the structure of the devfile object",
-    "definitions": {
-        "attributes": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
-        },
-        "selector": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
-        }
+  "description": "Devfile describes the structure of a cloud-native devworkspace and development environment.",
+  "type": "object",
+  "title": "Devfile schema - Version 2.1.0",
+  "required": [
+    "schemaVersion"
+  ],
+  "properties": {
+    "attributes": {
+      "description": "Map of implementation-dependant free-form YAML attributes.",
+      "type": "object",
+      "additionalProperties": true
     },
-    "required": [
-        "apiVersion",
-        "metadata"
-    ],
-    "additionalProperties": false,
-    "properties": {
-        "apiVersion": {
-            "const": "1.0.0",
-            "title": "Devfile API Version"
-        },
-        "metadata": {
+    "commands": {
+      "description": "Predefined, ready-to-use, devworkspace-related commands",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "exec"
+            ]
+          },
+          {
+            "required": [
+              "apply"
+            ]
+          },
+          {
+            "required": [
+              "composite"
+            ]
+          }
+        ],
+        "properties": {
+          "apply": {
+            "description": "Command that consists in applying a given component definition, typically bound to a devworkspace event.\n\nFor example, when an `apply` command is bound to a `preStart` event, and references a `container` component, it will start the container as a K8S initContainer in the devworkspace POD, unless the component has its `dedicatedPod` field set to `true`.\n\nWhen no `apply` command exist for a given component, it is assumed the component will be applied at devworkspace start by default.",
+            "type": "object",
+            "required": [
+              "component"
+            ],
+            "properties": {
+              "component": {
+                "description": "Describes component that will be applied",
+                "type": "string"
+              },
+              "group": {
+                "description": "Defines the group this command is part of",
+                "type": "object",
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "isDefault": {
+                    "description": "Identifies the default command for a given group kind",
+                    "type": "boolean"
+                  },
+                  "kind": {
+                    "description": "Kind of group the command is part of",
+                    "type": "string",
+                    "enum": [
+                      "build",
+                      "run",
+                      "test",
+                      "debug"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "label": {
+                "description": "Optional label that provides a label for this command to be used in Editor UI menus for example",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "attributes": {
+            "description": "Map of implementation-dependant free-form YAML attributes.",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "composite": {
+            "description": "Composite command that allows executing several sub-commands either sequentially or concurrently",
             "type": "object",
             "properties": {
-                "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "title": "Devfile Name",
-                    "description": "The name of the devfile. Workspaces created from devfile, will inherit this name",
-                    "examples": [
-                        "petclinic-dev-environment"
-                    ]
-                },
-                "generateName": {
-                    "type": "string",
-                    "minLength": 1,
-                    "title": "Devfile Generate Name",
-                    "description": "Workspaces created from devfile, will use it as base and append random suffix. It's used when name is not defined.",
-                    "examples": [
-                        "petclinic-"
-                    ]
+              "commands": {
+                "description": "The commands that comprise this composite command",
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
+              },
+              "group": {
+                "description": "Defines the group this command is part of",
+                "type": "object",
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "isDefault": {
+                    "description": "Identifies the default command for a given group kind",
+                    "type": "boolean"
+                  },
+                  "kind": {
+                    "description": "Kind of group the command is part of",
+                    "type": "string",
+                    "enum": [
+                      "build",
+                      "run",
+                      "test",
+                      "debug"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "label": {
+                "description": "Optional label that provides a label for this command to be used in Editor UI menus for example",
+                "type": "string"
+              },
+              "parallel": {
+                "description": "Indicates if the sub-commands should be executed concurrently",
+                "type": "boolean"
+              }
             },
-            "additionalProperties": false,
-            "anyOf": [
-                {
-                    "required": [
-                        "name"
-                    ]
-                },
-                {
-                    "required": [
-                        "generateName"
-                    ]
-                }
-            ]
-        },
-        "projects": {
-            "type": "array",
-            "title": "The Projects List",
-            "description": "Description of the projects, containing names and sources locations",
-            "items": {
-                "type": "object",
-                "required": [
+            "additionalProperties": false
+          },
+          "exec": {
+            "description": "CLI Command executed in an existing component container",
+            "type": "object",
+            "required": [
+              "commandLine",
+              "component"
+            ],
+            "properties": {
+              "commandLine": {
+                "description": "The actual command-line string\n\nSpecial variables that can be used:\n\n - `$PROJECTS_ROOT`: A path where projects sources are mounted as defined by container component's sourceMapping.\n\n - `$PROJECT_SOURCE`: A path to a project source ($PROJECTS_ROOT/\u003cproject-name\u003e). If there are multiple projects, this will point to the directory of the first one.",
+                "type": "string"
+              },
+              "component": {
+                "description": "Describes component to which given action relates",
+                "type": "string"
+              },
+              "env": {
+                "description": "Optional list of environment variables that have to be set before running the command",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
                     "name",
-                    "source"
-                ],
-                "additionalProperties": false,
-                "properties": {
+                    "value"
+                  ],
+                  "properties": {
                     "name": {
-                        "type": "string",
-                        "title": "The Project Name",
-                        "examples": [
-                            "petclinic"
-                        ]
+                      "type": "string"
                     },
-                    "source": {
-                        "type": "object",
-                        "title": "The Project Source object",
-                        "description": "Describes the project's source - type and location",
-                        "required": [
-                            "type",
-                            "location"
-                        ],
-                        "properties": {
-                            "type": {
-                                "type": "string",
-                                "description": "Project's source type.",
-                                "examples": [
-                                    "git",
-                                    "github",
-                                    "zip"
-                                ]
-                            },
-                            "location": {
-                                "type": "string",
-                                "description": "Project's source location address. Should be URL for git and github located projects, or file:// for zip.",
-                                "examples": [
-                                    "git@github.com:spring-projects/spring-petclinic.git"
-                                ]
-                            },
-                            "branch": {
-                                "type": "string",
-                                "description": "The name of the of the branch to check out after obtaining the source from the location. The branch has to already exist in the source otherwise the default branch is used. In case of git, this is also the name of the remote branch to push to.",
-                                "examples": [
-                                    "master",
-                                    "feature-42"
-                                ]
-                            },
-                            "startPoint": {
-                                "type": "string",
-                                "description": "The tag or commit id to reset the checked out branch to.",
-                                "examples": [
-                                    "release/4.2",
-                                    "349d3ad",
-                                    "v4.2.0"
-                                ]
-                            },
-                            "tag": {
-                                "type": "string",
-                                "description": "The name of the tag to reset the checked out branch to. Note that this is equivalent to 'startPoint' and provided for convenience.",
-                                "examples": [
-                                    "v4.2.0"
-                                ]
-                            },
-                            "commitId": {
-                                "type": "string",
-                                "description": "The id of the commit to reset the checked out branch to. Note that this is equivalent to 'startPoint' and provided for convenience.",
-                                "examples": [
-                                    "349d3ad"
-                                ]
-                            },
-                            "sparseCheckoutDir": {
-                                "type": "string",
-                                "description": "Part of project to populate in the working directory.",
-                                "examples": [
-                                    "/core/",
-                                    "core/",
-                                    "core",
-                                    "/wsmaster/che-core-api-workspace/",
-                                    "/d*"
-                                ]
-                            }
-                        }
-                    },
-                    "clonePath": {
-                        "type": "string",
-                        "description": "The path relative to the root of the projects to which this project should be cloned into. This is a unix-style relative path (i.e. uses forward slashes). The path is invalid if it is absolute or tries to escape the project root through the usage of '..'. If not specified, defaults to the project name."
+                    "value": {
+                      "type": "string"
                     }
+                  },
+                  "additionalProperties": false
                 }
-            }
-        },
-        "components": {
-            "type": "array",
-            "title": "The Components List",
-            "description": "Description of the workspace components, such as editor and plugins",
-            "items": {
+              },
+              "group": {
+                "description": "Defines the group this command is part of",
                 "type": "object",
                 "required": [
-                    "type"
+                  "kind"
                 ],
-                "if": {
-                    "properties": {
-                        "type": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "type"
-                    ]
-                },
-                "then": {
-                    "allOf": [
-                        {
-                            "if": {
-                                "properties": {
-                                    "type": {
-                                        "enum": [
-                                            "cheEditor",
-                                            "chePlugin"
-                                        ]
-                                    }
-                                }
-                            },
-                            "then": {
-                                "oneOf": [
-                                    {
-                                        "required": [
-                                            "id"
-                                        ],
-                                        "not": {
-                                            "required": [
-                                                "reference"
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "required": [
-                                            "reference"
-                                        ],
-                                        "not": {
-                                            "required": [
-                                                "id"
-                                            ]
-                                        }
-                                    }
-                                ],
-                                "properties": {
-                                    "type": {},
-                                    "alias": {},
-                                    "id": {
-                                        "type": "string",
-                                        "description": "Describes the component id. It has the following format: {plugin/editor PUBLISHER}/{plugin/editor NAME}/{plugin/editor VERSION}",
-                                        "pattern": "[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$",
-                                        "examples": [
-                                            "eclipse/maven-jdk8/1.0.0"
-                                        ]
-                                    },
-                                    "reference": {
-                                        "description": "Describes raw location of plugin yaml file.",
-                                        "type": "string",
-                                        "examples": [
-                                            "https://pastebin.com/raw/kYprWiNB"
-                                        ]
-                                    },
-                                    "registryUrl": {
-                                        "description": "Describes URL of custom plugin registry.",
-                                        "type": "string",
-                                        "pattern": "^(https?://)[a-zA-Z0-9_\\-./]+",
-                                        "examples": [
-                                            "https://che-plugin-registry.openshift.io/v3/"
-                                        ]
-                                    },
-                                    "memoryLimit": {
-                                        "type": "string",
-                                        "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
-                                        "examples": [
-                                            "128974848",
-                                            "129e6",
-                                            "129M",
-                                            "123Mi"
-                                        ]
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "if": {
-                                "properties": {
-                                    "type": {
-                                        "enum": [
-                                            "cheEditor"
-                                        ]
-                                    }
-                                }
-                            },
-                            "then": {
-                                "additionalProperties": false,
-                                "properties": {
-                                    "type": {},
-                                    "alias": {},
-                                    "id": {},
-                                    "env": {},
-                                    "reference": {},
-                                    "registryUrl": {},
-                                    "memoryLimit": {}
-                                }
-                            }
-                        },
-                        {
-                            "if": {
-                                "properties": {
-                                    "type": {
-                                        "enum": [
-                                            "chePlugin"
-                                        ]
-                                    }
-                                }
-                            },
-                            "then": {
-                                "additionalProperties": false,
-                                "properties": {
-                                    "type": {},
-                                    "alias": {},
-                                    "id": {},
-                                    "env": {},
-                                    "memoryLimit": {},
-                                    "reference": {},
-                                    "registryUrl": {},
-                                    "preferences": {
-                                        "type": "object",
-                                        "description": "Additional plugin preferences",
-                                        "examples": [
-                                            "{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"
-                                        ],
-                                        "additionalProperties": {
-                                            "type": [
-                                                "boolean",
-                                                "string",
-                                                "number"
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "if": {
-                                "properties": {
-                                    "type": {
-                                        "enum": [
-                                            "kubernetes",
-                                            "openshift"
-                                        ]
-                                    }
-                                }
-                            },
-                            "then": {
-                                "anyOf": [
-                                    {
-                                        "required": [
-                                            "reference"
-                                        ],
-                                        "additionalProperties": true
-                                    },
-                                    {
-                                        "required": [
-                                            "referenceContent"
-                                        ],
-                                        "additionalProperties": true
-                                    }
-                                ],
-                                "additionalProperties": false,
-                                "properties": {
-                                    "type": {},
-                                    "alias": {},
-                                    "mountSources": {},
-                                    "env": {},
-                                    "reference": {
-                                        "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
-                                        "type": "string",
-                                        "examples": [
-                                            "petclinic-app.yaml"
-                                        ]
-                                    },
-                                    "referenceContent": {
-                                        "description": "Inlined content of a file specified in field 'reference'",
-                                        "type": "string",
-                                        "examples": [
-                                            "{\"kind\":\"List\",\"items\":[{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"name\":\"ws\"},\"spec\":{\"containers\":[{\"image\":\"eclipse/che-dev:nightly\"}]}}]}"
-                                        ]
-                                    },
-                                    "selector": {
-                                        "$ref": "#/definitions/selector",
-                                        "description": "Describes the objects selector for the recipe type components. Allows to pick-up only selected items from k8s/openshift list",
-                                        "examples": [
-                                            "{\n   \"app.kubernetes.io/name\" : \"mysql\", \n   \"app.kubernetes.io/component\" : \"database\", \n   \"app.kubernetes.io/part-of\" : \"petclinic\" \n}"
-                                        ]
-                                    },
-                                    "entrypoints": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "parentName": {
-                                                    "type": "string",
-                                                    "description": "The name of the top level object in the referenced object list in which to search for containers. If not specified, the objects to search through can have any name."
-                                                },
-                                                "containerName": {
-                                                    "type": "string",
-                                                    "description": "The name of the container to apply the entrypoint to. If not specified, the entrypoint is modified on all matching containers."
-                                                },
-                                                "parentSelector": {
-                                                    "$ref": "#/definitions/selector",
-                                                    "description": "The selector on labels of the top level objects in the referenced list in which to search for containers. If not specified, the objects to search through can have any labels."
-                                                },
-                                                "command": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string"
-                                                    },
-                                                    "default": null,
-                                                    "description": "The command to run in the component instead of the default one provided in the image of the container. Defaults to null, meaning use whatever is defined in the image.",
-                                                    "examples": [
-                                                        "['/bin/sh', '-c']"
-                                                    ]
-                                                },
-                                                "args": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string"
-                                                    },
-                                                    "default": null,
-                                                    "description": "The arguments to supply to the command running the component. The arguments are supplied either to the default command provided in the image of the container or to the overridden command. Defaults to null, meaning use whatever is defined in the image.",
-                                                    "examples": [
-                                                        "['-R', '-f']"
-                                                    ]
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "if": {
-                                "properties": {
-                                    "type": {
-                                        "enum": [
-                                            "dockerimage"
-                                        ]
-                                    }
-                                }
-                            },
-                            "then": {
-                                "required": [
-                                    "image",
-                                    "memoryLimit"
-                                ],
-                                "additionalProperties": false,
-                                "properties": {
-                                    "type": {},
-                                    "alias": {},
-                                    "mountSources": {},
-                                    "env": {},
-                                    "image": {
-                                        "type": "string",
-                                        "description": "Specifies the docker image that should be used for component",
-                                        "examples": [
-                                            "eclipse/maven-jdk8:1.0.0"
-                                        ]
-                                    },
-                                    "memoryLimit": {
-                                        "type": "string",
-                                        "description": "Describes memory limit for the component. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
-                                        "examples": [
-                                            "128974848",
-                                            "129e6",
-                                            "129M",
-                                            "123Mi"
-                                        ]
-                                    },
-                                    "command": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "default": null,
-                                        "description": "The command to run in the dockerimage component instead of the default one provided in the image. Defaults to null, meaning use whatever is defined in the image.",
-                                        "examples": [
-                                            "['/bin/sh', '-c']"
-                                        ]
-                                    },
-                                    "args": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "default": null,
-                                        "description": "The arguments to supply to the command running the dockerimage component. The arguments are supplied either to the default command provided in the image or to the overridden command. Defaults to null, meaning use whatever is defined in the image.",
-                                        "examples": [
-                                            "['-R', '-f']"
-                                        ]
-                                    },
-                                    "volumes": {
-                                        "type": "array",
-                                        "description": "Describes volumes which should be mount to component",
-                                        "items": {
-                                            "type": "object",
-                                            "description": "Describe volume that should be mount to component",
-                                            "required": [
-                                                "name",
-                                                "containerPath"
-                                            ],
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string",
-                                                    "title": "The Volume Name",
-                                                    "description": "The volume name. If several components mount the same volume then they will reuse the volume and will be able to access to the same files",
-                                                    "examples": [
-                                                        "my-data"
-                                                    ]
-                                                },
-                                                "containerPath": {
-                                                    "type": "string",
-                                                    "title": "The path where volume should be mount to container",
-                                                    "examples": [
-                                                        "/home/user/data"
-                                                    ]
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "endpoints": {
-                                        "type": "array",
-                                        "description": "Describes dockerimage component endpoints",
-                                        "items": {
-                                            "name": "object",
-                                            "description": "Describes dockerimage component endpoint",
-                                            "required": [
-                                                "name",
-                                                "port"
-                                            ],
-                                            "properties": {
-                                                "name": {
-                                                    "type": "string",
-                                                    "title": "The Endpoint Name",
-                                                    "description": "The Endpoint name"
-                                                },
-                                                "port": {
-                                                    "type": "integer",
-                                                    "title": "The Endpoint Port",
-                                                    "description": "The container port that should be used as endpoint"
-                                                },
-                                                "attributes": {
-                                                    "type": "object",
-                                                    "public": {
-                                                        "type": "boolean",
-                                                        "description": "Identifies endpoint as workspace internally or externally accessible.",
-                                                        "default": "true"
-                                                    },
-                                                    "secure": {
-                                                        "type": "boolean",
-                                                        "description": "Identifies server as secure or non-secure. Requests to secure servers will be authenticated and must contain machine token",
-                                                        "default": "false"
-                                                    },
-                                                    "discoverable": {
-                                                        "type": "boolean",
-                                                        "description": "Identifies endpoint as accessible by its name.",
-                                                        "default": "false"
-                                                    },
-                                                    "protocol": {
-                                                        "type": "boolean",
-                                                        "description": "Defines protocol that should be used for communication with endpoint. Is used for endpoint URL evaluation"
-                                                    },
-                                                    "additionalProperties": {
-                                                        "type": "string"
-                                                    },
-                                                    "javaType": "java.util.Map<String, String>"
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
                 "properties": {
-                    "alias": {
-                        "description": "The name using which other places of this devfile (like commands) can refer to this component. This attribute is optional but must be unique in the devfile if specified.",
-                        "type": "string",
-                        "examples": [
-                            "mvn-stack"
-                        ]
-                    },
-                    "type": {
-                        "description": "Describes type of the component, e.g. whether it is an plugin or editor or other type",
-                        "enum": [
-                            "cheEditor",
-                            "chePlugin",
-                            "kubernetes",
-                            "openshift",
-                            "dockerimage"
-                        ],
-                        "examples": [
-                            "chePlugin",
-                            "cheEditor",
-                            "kubernetes",
-                            "openshift",
-                            "dockerimage"
-                        ]
-                    },
-                    "mountSources": {
-                        "type": "boolean",
-                        "description": "Describes whether projects sources should be mount to the component. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
-                        "default": "false"
-                    },
-                    "env": {
-                        "type": "array",
-                        "description": "The environment variables list that should be set to docker container",
-                        "items": {
-                            "type": "object",
-                            "description": "Describes environment variable",
-                            "required": [
-                                "name",
-                                "value"
-                            ],
-                            "properties": {
-                                "name": {
-                                    "type": "string",
-                                    "title": "The Environment Variable Name",
-                                    "description": "The environment variable name"
-                                },
-                                "value": {
-                                    "type": "string",
-                                    "title": "The Environment Variable Value",
-                                    "description": "The environment variable value"
-                                }
-                            }
-                        }
-                    }
+                  "isDefault": {
+                    "description": "Identifies the default command for a given group kind",
+                    "type": "boolean"
+                  },
+                  "kind": {
+                    "description": "Kind of group the command is part of",
+                    "type": "string",
+                    "enum": [
+                      "build",
+                      "run",
+                      "test",
+                      "debug"
+                    ]
+                  }
                 },
-                "additionalProperties": true
-            }
+                "additionalProperties": false
+              },
+              "hotReloadCapable": {
+                "description": "Whether the command is capable to reload itself when source code changes. If set to `true` the command won't be restarted and it is expected to handle file changes on its own.\n\nDefault value is `false`",
+                "type": "boolean"
+              },
+              "label": {
+                "description": "Optional label that provides a label for this command to be used in Editor UI menus for example",
+                "type": "string"
+              },
+              "workingDir": {
+                "description": "Working directory where the command should be executed\n\nSpecial variables that can be used:\n\n - `$PROJECTS_ROOT`: A path where projects sources are mounted as defined by container component's sourceMapping.\n\n - `$PROJECT_SOURCE`: A path to a project source ($PROJECTS_ROOT/\u003cproject-name\u003e). If there are multiple projects, this will point to the directory of the first one.",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "id": {
+            "description": "Mandatory identifier that allows referencing this command in composite commands, from a parent, or in events.",
+            "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "components": {
+      "description": "List of the devworkspace components, such as editor and plugins, user-provided containers, or other types of components",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "container"
+            ]
+          },
+          {
+            "required": [
+              "kubernetes"
+            ]
+          },
+          {
+            "required": [
+              "openshift"
+            ]
+          },
+          {
+            "required": [
+              "volume"
+            ]
+          }
+        ],
+        "properties": {
+          "attributes": {
+            "description": "Map of implementation-dependant free-form YAML attributes.",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "container": {
+            "description": "Allows adding and configuring devworkspace-related containers",
+            "type": "object",
+            "required": [
+              "image"
+            ],
+            "properties": {
+              "args": {
+                "description": "The arguments to supply to the command running the dockerimage component. The arguments are supplied either to the default command provided in the image or to the overridden command.\n\nDefaults to an empty array, meaning use whatever is defined in the image.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "command": {
+                "description": "The command to run in the dockerimage component instead of the default one provided in the image.\n\nDefaults to an empty array, meaning use whatever is defined in the image.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cpuLimit": {
+                "type": "string"
+              },
+              "cpuRequest": {
+                "type": "string"
+              },
+              "dedicatedPod": {
+                "description": "Specify if a container should run in its own separated pod, instead of running as part of the main development environment pod.\n\nDefault value is `false`",
+                "type": "boolean"
+              },
+              "endpoints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "targetPort"
+                  ],
+                  "properties": {
+                    "attributes": {
+                      "description": "Map of implementation-dependant string-based free-form attributes.\n\nExamples of Che-specific attributes:\n- cookiesAuthEnabled: \"true\" / \"false\",\n- type: \"terminal\" / \"ide\" / \"ide-dev\",",
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "exposure": {
+                      "description": "Describes how the endpoint should be exposed on the network.\n- `public` means that the endpoint will be exposed on the public network, typically through a K8S ingress or an OpenShift route.\n- `internal` means that the endpoint will be exposed internally outside of the main devworkspace POD, typically by K8S services, to be consumed by other elements running on the same cloud internal network.\n- `none` means that the endpoint will not be exposed and will only be accessible inside the main devworkspace POD, on a local address.\n\nDefault value is `public`",
+                      "type": "string",
+                      "default": "public",
+                      "enum": [
+                        "public",
+                        "internal",
+                        "none"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 63,
+                      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                    },
+                    "path": {
+                      "description": "Path of the endpoint URL",
+                      "type": "string"
+                    },
+                    "protocol": {
+                      "description": "Describes the application and transport protocols of the traffic that will go through this endpoint.\n- `http`: Endpoint will have `http` traffic, typically on a TCP connection. It will be automaticaly promoted to `https` when the `secure` field is set to `true`.\n- `https`: Endpoint will have `https` traffic, typically on a TCP connection.\n- `ws`: Endpoint will have `ws` traffic, typically on a TCP connection. It will be automaticaly promoted to `wss` when the `secure` field is set to `true`.\n- `wss`: Endpoint will have `wss` traffic, typically on a TCP connection.\n- `tcp`: Endpoint will have traffic on a TCP connection, without specifying an application protocol.\n- `udp`: Endpoint will have traffic on an UDP connection, without specifying an application protocol.\n\nDefault value is `http`",
+                      "type": "string",
+                      "default": "http",
+                      "enum": [
+                        "http",
+                        "https",
+                        "ws",
+                        "wss",
+                        "tcp",
+                        "udp"
+                      ]
+                    },
+                    "secure": {
+                      "description": "Describes whether the endpoint should be secured and protected by some authentication process. This requires a protocol of `https` or `wss`.",
+                      "type": "boolean"
+                    },
+                    "targetPort": {
+                      "type": "integer"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "env": {
+                "description": "Environment variables used in this container.\n\nThe following variables are reserved and cannot be overridden via env:\n\n - `$PROJECTS_ROOT`\n\n - `$PROJECT_SOURCE`",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "value"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "image": {
+                "type": "string"
+              },
+              "memoryLimit": {
+                "type": "string"
+              },
+              "memoryRequest": {
+                "type": "string"
+              },
+              "mountSources": {
+                "description": "Toggles whether or not the project source code should be mounted in the component.\n\nDefaults to true for all component types except plugins and components that set `dedicatedPod` to true.",
+                "type": "boolean"
+              },
+              "sourceMapping": {
+                "description": "Optional specification of the path in the container where project sources should be transferred/mounted when `mountSources` is `true`. When omitted, the default value of /projects is used.",
+                "type": "string",
+                "default": "/projects"
+              },
+              "volumeMounts": {
+                "description": "List of volumes mounts that should be mounted is this container.",
+                "type": "array",
+                "items": {
+                  "description": "Volume that should be mounted to a component container",
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "description": "The volume mount name is the name of an existing `Volume` component. If several containers mount the same volume name then they will reuse the same volume and will be able to access to the same files.",
+                      "type": "string",
+                      "maxLength": 63,
+                      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                    },
+                    "path": {
+                      "description": "The path in the component container where the volume should be mounted. If not path is mentioned, default path is the is `/\u003cname\u003e`.",
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "kubernetes": {
+            "description": "Allows importing into the devworkspace the Kubernetes resources defined in a given manifest. For example this allows reusing the Kubernetes definitions used to deploy some runtime components in production.",
+            "type": "object",
+            "oneOf": [
+              {
+                "required": [
+                  "uri"
+                ]
+              },
+              {
+                "required": [
+                  "inlined"
+                ]
+              }
+            ],
+            "properties": {
+              "endpoints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "targetPort"
+                  ],
+                  "properties": {
+                    "attributes": {
+                      "description": "Map of implementation-dependant string-based free-form attributes.\n\nExamples of Che-specific attributes:\n- cookiesAuthEnabled: \"true\" / \"false\",\n- type: \"terminal\" / \"ide\" / \"ide-dev\",",
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "exposure": {
+                      "description": "Describes how the endpoint should be exposed on the network.\n- `public` means that the endpoint will be exposed on the public network, typically through a K8S ingress or an OpenShift route.\n- `internal` means that the endpoint will be exposed internally outside of the main devworkspace POD, typically by K8S services, to be consumed by other elements running on the same cloud internal network.\n- `none` means that the endpoint will not be exposed and will only be accessible inside the main devworkspace POD, on a local address.\n\nDefault value is `public`",
+                      "type": "string",
+                      "default": "public",
+                      "enum": [
+                        "public",
+                        "internal",
+                        "none"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 63,
+                      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                    },
+                    "path": {
+                      "description": "Path of the endpoint URL",
+                      "type": "string"
+                    },
+                    "protocol": {
+                      "description": "Describes the application and transport protocols of the traffic that will go through this endpoint.\n- `http`: Endpoint will have `http` traffic, typically on a TCP connection. It will be automaticaly promoted to `https` when the `secure` field is set to `true`.\n- `https`: Endpoint will have `https` traffic, typically on a TCP connection.\n- `ws`: Endpoint will have `ws` traffic, typically on a TCP connection. It will be automaticaly promoted to `wss` when the `secure` field is set to `true`.\n- `wss`: Endpoint will have `wss` traffic, typically on a TCP connection.\n- `tcp`: Endpoint will have traffic on a TCP connection, without specifying an application protocol.\n- `udp`: Endpoint will have traffic on an UDP connection, without specifying an application protocol.\n\nDefault value is `http`",
+                      "type": "string",
+                      "default": "http",
+                      "enum": [
+                        "http",
+                        "https",
+                        "ws",
+                        "wss",
+                        "tcp",
+                        "udp"
+                      ]
+                    },
+                    "secure": {
+                      "description": "Describes whether the endpoint should be secured and protected by some authentication process. This requires a protocol of `https` or `wss`.",
+                      "type": "boolean"
+                    },
+                    "targetPort": {
+                      "type": "integer"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "inlined": {
+                "description": "Inlined manifest",
+                "type": "string"
+              },
+              "uri": {
+                "description": "Location in a file fetched from a uri.",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "name": {
+            "description": "Mandatory name that allows referencing the component from other elements (such as commands) or from an external devfile that may reference this component through a parent or a plugin.",
+            "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+          },
+          "openshift": {
+            "description": "Allows importing into the devworkspace the OpenShift resources defined in a given manifest. For example this allows reusing the OpenShift definitions used to deploy some runtime components in production.",
+            "type": "object",
+            "oneOf": [
+              {
+                "required": [
+                  "uri"
+                ]
+              },
+              {
+                "required": [
+                  "inlined"
+                ]
+              }
+            ],
+            "properties": {
+              "endpoints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "targetPort"
+                  ],
+                  "properties": {
+                    "attributes": {
+                      "description": "Map of implementation-dependant string-based free-form attributes.\n\nExamples of Che-specific attributes:\n- cookiesAuthEnabled: \"true\" / \"false\",\n- type: \"terminal\" / \"ide\" / \"ide-dev\",",
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "exposure": {
+                      "description": "Describes how the endpoint should be exposed on the network.\n- `public` means that the endpoint will be exposed on the public network, typically through a K8S ingress or an OpenShift route.\n- `internal` means that the endpoint will be exposed internally outside of the main devworkspace POD, typically by K8S services, to be consumed by other elements running on the same cloud internal network.\n- `none` means that the endpoint will not be exposed and will only be accessible inside the main devworkspace POD, on a local address.\n\nDefault value is `public`",
+                      "type": "string",
+                      "default": "public",
+                      "enum": [
+                        "public",
+                        "internal",
+                        "none"
+                      ]
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 63,
+                      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                    },
+                    "path": {
+                      "description": "Path of the endpoint URL",
+                      "type": "string"
+                    },
+                    "protocol": {
+                      "description": "Describes the application and transport protocols of the traffic that will go through this endpoint.\n- `http`: Endpoint will have `http` traffic, typically on a TCP connection. It will be automaticaly promoted to `https` when the `secure` field is set to `true`.\n- `https`: Endpoint will have `https` traffic, typically on a TCP connection.\n- `ws`: Endpoint will have `ws` traffic, typically on a TCP connection. It will be automaticaly promoted to `wss` when the `secure` field is set to `true`.\n- `wss`: Endpoint will have `wss` traffic, typically on a TCP connection.\n- `tcp`: Endpoint will have traffic on a TCP connection, without specifying an application protocol.\n- `udp`: Endpoint will have traffic on an UDP connection, without specifying an application protocol.\n\nDefault value is `http`",
+                      "type": "string",
+                      "default": "http",
+                      "enum": [
+                        "http",
+                        "https",
+                        "ws",
+                        "wss",
+                        "tcp",
+                        "udp"
+                      ]
+                    },
+                    "secure": {
+                      "description": "Describes whether the endpoint should be secured and protected by some authentication process. This requires a protocol of `https` or `wss`.",
+                      "type": "boolean"
+                    },
+                    "targetPort": {
+                      "type": "integer"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "inlined": {
+                "description": "Inlined manifest",
+                "type": "string"
+              },
+              "uri": {
+                "description": "Location in a file fetched from a uri.",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "volume": {
+            "description": "Allows specifying the definition of a volume shared by several other components",
+            "type": "object",
+            "properties": {
+              "ephemeral": {
+                "description": "Ephemeral volumes are not stored persistently across restarts. Defaults to false",
+                "type": "boolean"
+              },
+              "size": {
+                "description": "Size of the volume",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "events": {
+      "description": "Bindings of commands to events. Each command is referred-to by its name.",
+      "type": "object",
+      "properties": {
+        "postStart": {
+          "description": "IDs of commands that should be executed after the devworkspace is completely started. In the case of Che-Theia, these commands should be executed after all plugins and extensions have started, including project cloning. This means that those commands are not triggered until the user opens the IDE in his browser.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postStop": {
+          "description": "IDs of commands that should be executed after stopping the devworkspace.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preStart": {
+          "description": "IDs of commands that should be executed before the devworkspace start. Kubernetes-wise, these commands would typically be executed in init containers of the devworkspace POD.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preStop": {
+          "description": "IDs of commands that should be executed before stopping the devworkspace.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "description": "Optional metadata",
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "description": "Map of implementation-dependant free-form YAML attributes. Deprecated, use the top-level attributes field instead.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "description": {
+          "description": "Optional devfile description",
+          "type": "string"
+        },
+        "displayName": {
+          "description": "Optional devfile display name",
+          "type": "string"
+        },
+        "globalMemoryLimit": {
+          "description": "Optional devfile global memory limit",
+          "type": "string"
+        },
+        "icon": {
+          "description": "Optional devfile icon, can be a URI or a relative path in the project",
+          "type": "string"
+        },
+        "language": {
+          "description": "Optional devfile language",
+          "type": "string"
+        },
+        "name": {
+          "description": "Optional devfile name",
+          "type": "string"
+        },
+        "projectType": {
+          "description": "Optional devfile project type",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Optional devfile tags",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "description": "Optional semver-compatible version",
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\-[0-9a-z-]+(\\.[0-9a-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
+        },
+        "website": {
+          "description": "Optional devfile website",
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "parent": {
+      "description": "Parent devworkspace template",
+      "type": "object",
+      "oneOf": [
+        {
+          "required": [
+            "uri"
+          ]
+        },
+        {
+          "required": [
+            "id"
+          ]
+        },
+        {
+          "required": [
+            "kubernetes"
+          ]
+        }
+      ],
+      "properties": {
+        "attributes": {
+          "description": "Overrides of attributes encapsulated in a parent devfile. Overriding is done according to K8S strategic merge patch standard rules.",
+          "type": "object",
+          "additionalProperties": true
         },
         "commands": {
-            "type": "array",
-            "title": "The Commands List",
-            "description": "Description of the predefined commands to be available in workspace",
-            "items": {
-                "type": "object",
-                "additionalProperties": false,
+          "description": "Overrides of commands encapsulated in a parent devfile or a plugin. Overriding is done according to K8S strategic merge patch standard rules.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "oneOf": [
+              {
                 "required": [
-                    "name",
-                    "actions"
+                  "exec"
+                ]
+              },
+              {
+                "required": [
+                  "apply"
+                ]
+              },
+              {
+                "required": [
+                  "composite"
+                ]
+              }
+            ],
+            "properties": {
+              "apply": {
+                "description": "Command that consists in applying a given component definition, typically bound to a devworkspace event.\n\nFor example, when an `apply` command is bound to a `preStart` event, and references a `container` component, it will start the container as a K8S initContainer in the devworkspace POD, unless the component has its `dedicatedPod` field set to `true`.\n\nWhen no `apply` command exist for a given component, it is assumed the component will be applied at devworkspace start by default.",
+                "type": "object",
+                "properties": {
+                  "component": {
+                    "description": "Describes component that will be applied",
+                    "type": "string"
+                  },
+                  "group": {
+                    "description": "Defines the group this command is part of",
+                    "type": "object",
+                    "properties": {
+                      "isDefault": {
+                        "description": "Identifies the default command for a given group kind",
+                        "type": "boolean"
+                      },
+                      "kind": {
+                        "description": "Kind of group the command is part of",
+                        "type": "string",
+                        "enum": [
+                          "build",
+                          "run",
+                          "test",
+                          "debug"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "label": {
+                    "description": "Optional label that provides a label for this command to be used in Editor UI menus for example",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "attributes": {
+                "description": "Map of implementation-dependant free-form YAML attributes.",
+                "type": "object",
+                "additionalProperties": true
+              },
+              "composite": {
+                "description": "Composite command that allows executing several sub-commands either sequentially or concurrently",
+                "type": "object",
+                "properties": {
+                  "commands": {
+                    "description": "The commands that comprise this composite command",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "group": {
+                    "description": "Defines the group this command is part of",
+                    "type": "object",
+                    "properties": {
+                      "isDefault": {
+                        "description": "Identifies the default command for a given group kind",
+                        "type": "boolean"
+                      },
+                      "kind": {
+                        "description": "Kind of group the command is part of",
+                        "type": "string",
+                        "enum": [
+                          "build",
+                          "run",
+                          "test",
+                          "debug"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "label": {
+                    "description": "Optional label that provides a label for this command to be used in Editor UI menus for example",
+                    "type": "string"
+                  },
+                  "parallel": {
+                    "description": "Indicates if the sub-commands should be executed concurrently",
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "exec": {
+                "description": "CLI Command executed in an existing component container",
+                "type": "object",
+                "properties": {
+                  "commandLine": {
+                    "description": "The actual command-line string\n\nSpecial variables that can be used:\n\n - `$PROJECTS_ROOT`: A path where projects sources are mounted as defined by container component's sourceMapping.\n\n - `$PROJECT_SOURCE`: A path to a project source ($PROJECTS_ROOT/\u003cproject-name\u003e). If there are multiple projects, this will point to the directory of the first one.",
+                    "type": "string"
+                  },
+                  "component": {
+                    "description": "Describes component to which given action relates",
+                    "type": "string"
+                  },
+                  "env": {
+                    "description": "Optional list of environment variables that have to be set before running the command",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "group": {
+                    "description": "Defines the group this command is part of",
+                    "type": "object",
+                    "properties": {
+                      "isDefault": {
+                        "description": "Identifies the default command for a given group kind",
+                        "type": "boolean"
+                      },
+                      "kind": {
+                        "description": "Kind of group the command is part of",
+                        "type": "string",
+                        "enum": [
+                          "build",
+                          "run",
+                          "test",
+                          "debug"
+                        ]
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "hotReloadCapable": {
+                    "description": "Whether the command is capable to reload itself when source code changes. If set to `true` the command won't be restarted and it is expected to handle file changes on its own.\n\nDefault value is `false`",
+                    "type": "boolean"
+                  },
+                  "label": {
+                    "description": "Optional label that provides a label for this command to be used in Editor UI menus for example",
+                    "type": "string"
+                  },
+                  "workingDir": {
+                    "description": "Working directory where the command should be executed\n\nSpecial variables that can be used:\n\n - `$PROJECTS_ROOT`: A path where projects sources are mounted as defined by container component's sourceMapping.\n\n - `$PROJECT_SOURCE`: A path to a project source ($PROJECTS_ROOT/\u003cproject-name\u003e). If there are multiple projects, this will point to the directory of the first one.",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "id": {
+                "description": "Mandatory identifier that allows referencing this command in composite commands, from a parent, or in events.",
+                "type": "string",
+                "maxLength": 63,
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "components": {
+          "description": "Overrides of components encapsulated in a parent devfile or a plugin. Overriding is done according to K8S strategic merge patch standard rules.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "container"
+                ]
+              },
+              {
+                "required": [
+                  "kubernetes"
+                ]
+              },
+              {
+                "required": [
+                  "openshift"
+                ]
+              },
+              {
+                "required": [
+                  "volume"
+                ]
+              }
+            ],
+            "properties": {
+              "attributes": {
+                "description": "Map of implementation-dependant free-form YAML attributes.",
+                "type": "object",
+                "additionalProperties": true
+              },
+              "container": {
+                "description": "Allows adding and configuring devworkspace-related containers",
+                "type": "object",
+                "properties": {
+                  "args": {
+                    "description": "The arguments to supply to the command running the dockerimage component. The arguments are supplied either to the default command provided in the image or to the overridden command.\n\nDefaults to an empty array, meaning use whatever is defined in the image.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "command": {
+                    "description": "The command to run in the dockerimage component instead of the default one provided in the image.\n\nDefaults to an empty array, meaning use whatever is defined in the image.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cpuLimit": {
+                    "type": "string"
+                  },
+                  "cpuRequest": {
+                    "type": "string"
+                  },
+                  "dedicatedPod": {
+                    "description": "Specify if a container should run in its own separated pod, instead of running as part of the main development environment pod.\n\nDefault value is `false`",
+                    "type": "boolean"
+                  },
+                  "endpoints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "attributes": {
+                          "description": "Map of implementation-dependant string-based free-form attributes.\n\nExamples of Che-specific attributes:\n- cookiesAuthEnabled: \"true\" / \"false\",\n- type: \"terminal\" / \"ide\" / \"ide-dev\",",
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "exposure": {
+                          "description": "Describes how the endpoint should be exposed on the network.\n- `public` means that the endpoint will be exposed on the public network, typically through a K8S ingress or an OpenShift route.\n- `internal` means that the endpoint will be exposed internally outside of the main devworkspace POD, typically by K8S services, to be consumed by other elements running on the same cloud internal network.\n- `none` means that the endpoint will not be exposed and will only be accessible inside the main devworkspace POD, on a local address.\n\nDefault value is `public`",
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "internal",
+                            "none"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 63,
+                          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "path": {
+                          "description": "Path of the endpoint URL",
+                          "type": "string"
+                        },
+                        "protocol": {
+                          "description": "Describes the application and transport protocols of the traffic that will go through this endpoint.\n- `http`: Endpoint will have `http` traffic, typically on a TCP connection. It will be automaticaly promoted to `https` when the `secure` field is set to `true`.\n- `https`: Endpoint will have `https` traffic, typically on a TCP connection.\n- `ws`: Endpoint will have `ws` traffic, typically on a TCP connection. It will be automaticaly promoted to `wss` when the `secure` field is set to `true`.\n- `wss`: Endpoint will have `wss` traffic, typically on a TCP connection.\n- `tcp`: Endpoint will have traffic on a TCP connection, without specifying an application protocol.\n- `udp`: Endpoint will have traffic on an UDP connection, without specifying an application protocol.\n\nDefault value is `http`",
+                          "type": "string",
+                          "enum": [
+                            "http",
+                            "https",
+                            "ws",
+                            "wss",
+                            "tcp",
+                            "udp"
+                          ]
+                        },
+                        "secure": {
+                          "description": "Describes whether the endpoint should be secured and protected by some authentication process. This requires a protocol of `https` or `wss`.",
+                          "type": "boolean"
+                        },
+                        "targetPort": {
+                          "type": "integer"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "env": {
+                    "description": "Environment variables used in this container.\n\nThe following variables are reserved and cannot be overridden via env:\n\n - `$PROJECTS_ROOT`\n\n - `$PROJECT_SOURCE`",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "image": {
+                    "type": "string"
+                  },
+                  "memoryLimit": {
+                    "type": "string"
+                  },
+                  "memoryRequest": {
+                    "type": "string"
+                  },
+                  "mountSources": {
+                    "description": "Toggles whether or not the project source code should be mounted in the component.\n\nDefaults to true for all component types except plugins and components that set `dedicatedPod` to true.",
+                    "type": "boolean"
+                  },
+                  "sourceMapping": {
+                    "description": "Optional specification of the path in the container where project sources should be transferred/mounted when `mountSources` is `true`. When omitted, the default value of /projects is used.",
+                    "type": "string"
+                  },
+                  "volumeMounts": {
+                    "description": "List of volumes mounts that should be mounted is this container.",
+                    "type": "array",
+                    "items": {
+                      "description": "Volume that should be mounted to a component container",
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "name": {
+                          "description": "The volume mount name is the name of an existing `Volume` component. If several containers mount the same volume name then they will reuse the same volume and will be able to access to the same files.",
+                          "type": "string",
+                          "maxLength": 63,
+                          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "path": {
+                          "description": "The path in the component container where the volume should be mounted. If not path is mentioned, default path is the is `/\u003cname\u003e`.",
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kubernetes": {
+                "description": "Allows importing into the devworkspace the Kubernetes resources defined in a given manifest. For example this allows reusing the Kubernetes definitions used to deploy some runtime components in production.",
+                "type": "object",
+                "oneOf": [
+                  {
+                    "required": [
+                      "uri"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "inlined"
+                    ]
+                  }
                 ],
                 "properties": {
-                    "name": {
-                        "description": "Describes the name of the command. Should be unique per commands set.",
-                        "type": "string",
-                        "examples": [
-                            "build"
-                        ]
-                    },
-                    "attributes": {
-                        "description": "Additional command attributes",
-                        "$ref": "#/definitions/attributes"
-                    },
-                    "actions": {
-                        "type": "array",
-                        "description": "List of the actions of given command. Now the only one command must be specified in list but there are plans to implement supporting multiple actions commands.",
-                        "title": "The Command Actions List",
-                        "minItems": 1,
-                        "maxItems": 1,
-                        "items": {
-                            "oneOf": [
-                                {
-                                    "properties": {
-                                        "type": {},
-                                        "component": {},
-                                        "command": {},
-                                        "workdir": {}
-                                    },
-                                    "required": [
-                                        "type",
-                                        "component",
-                                        "command"
-                                    ],
-                                    "additionalProperties": false
-                                },
-                                {
-                                    "properties": {
-                                        "type": {},
-                                        "reference": {},
-                                        "referenceContent": {}
-                                    },
-                                    "anyOf": [
-                                        {
-                                            "required": [
-                                                "type",
-                                                "reference"
-                                            ],
-                                            "additionalProperties": true
-                                        },
-                                        {
-                                            "required": [
-                                                "type",
-                                                "referenceContent"
-                                            ],
-                                            "additionalProperties": true
-                                        }
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ],
-                            "type": "object",
-                            "properties": {
-                                "type": {
-                                    "description": "Describes action type",
-                                    "type": "string",
-                                    "examples": [
-                                        "exec"
-                                    ]
-                                },
-                                "component": {
-                                    "type": "string",
-                                    "description": "Describes component to which given action relates",
-                                    "examples": [
-                                        "mvn-stack"
-                                    ]
-                                },
-                                "command": {
-                                    "type": "string",
-                                    "description": "The actual action command-line string",
-                                    "examples": [
-                                        "mvn package"
-                                    ]
-                                },
-                                "workdir": {
-                                    "type": "string",
-                                    "description": "Working directory where the command should be executed",
-                                    "examples": [
-                                        "/projects/spring-petclinic"
-                                    ]
-                                },
-                                "reference": {
-                                    "type": "string",
-                                    "description": "the path relative to the location of the devfile to the configuration file defining one or more actions in the editor-specific format",
-                                    "examples": [
-                                        "../ide-config/launch.json"
-                                    ]
-                                },
-                                "referenceContent": {
-                                    "type": "string",
-                                    "description": "The content of the referenced configuration file that defines one or more actions in the editor-specific format",
-                                    "examples": [
-                                        "{\"version\": \"2.0.0\",\n    \"tasks\": [\n        {\n            \"type\": \"typescript\",\n            \"tsconfig\": \"tsconfig.json\",\n            \"problemMatcher\": [\n                \"$tsc\"\n            ],\n            \"group\": {\n                \"kind\": \"build\",\n                \"isDefault\": true\n            }\n        }\n    ]}"
-                                    ]
-                                }
-                            }
+                  "endpoints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "attributes": {
+                          "description": "Map of implementation-dependant string-based free-form attributes.\n\nExamples of Che-specific attributes:\n- cookiesAuthEnabled: \"true\" / \"false\",\n- type: \"terminal\" / \"ide\" / \"ide-dev\",",
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "exposure": {
+                          "description": "Describes how the endpoint should be exposed on the network.\n- `public` means that the endpoint will be exposed on the public network, typically through a K8S ingress or an OpenShift route.\n- `internal` means that the endpoint will be exposed internally outside of the main devworkspace POD, typically by K8S services, to be consumed by other elements running on the same cloud internal network.\n- `none` means that the endpoint will not be exposed and will only be accessible inside the main devworkspace POD, on a local address.\n\nDefault value is `public`",
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "internal",
+                            "none"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 63,
+                          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "path": {
+                          "description": "Path of the endpoint URL",
+                          "type": "string"
+                        },
+                        "protocol": {
+                          "description": "Describes the application and transport protocols of the traffic that will go through this endpoint.\n- `http`: Endpoint will have `http` traffic, typically on a TCP connection. It will be automaticaly promoted to `https` when the `secure` field is set to `true`.\n- `https`: Endpoint will have `https` traffic, typically on a TCP connection.\n- `ws`: Endpoint will have `ws` traffic, typically on a TCP connection. It will be automaticaly promoted to `wss` when the `secure` field is set to `true`.\n- `wss`: Endpoint will have `wss` traffic, typically on a TCP connection.\n- `tcp`: Endpoint will have traffic on a TCP connection, without specifying an application protocol.\n- `udp`: Endpoint will have traffic on an UDP connection, without specifying an application protocol.\n\nDefault value is `http`",
+                          "type": "string",
+                          "enum": [
+                            "http",
+                            "https",
+                            "ws",
+                            "wss",
+                            "tcp",
+                            "udp"
+                          ]
+                        },
+                        "secure": {
+                          "description": "Describes whether the endpoint should be secured and protected by some authentication process. This requires a protocol of `https` or `wss`.",
+                          "type": "boolean"
+                        },
+                        "targetPort": {
+                          "type": "integer"
                         }
-                    },
-                    "previewUrl": {
-                        "type": "object",
-                        "required": [
-                            "port"
-                        ],
-                        "properties": {
-                            "port": {
-                                "type": "number",
-                                "minimum": 0,
-                                "maximum": 65535
-                            },
-                            "path": {
-                                "type": "string"
-                            }
-                        }
+                      },
+                      "additionalProperties": false
                     }
-                }
-            }
+                  },
+                  "inlined": {
+                    "description": "Inlined manifest",
+                    "type": "string"
+                  },
+                  "uri": {
+                    "description": "Location in a file fetched from a uri.",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "name": {
+                "description": "Mandatory name that allows referencing the component from other elements (such as commands) or from an external devfile that may reference this component through a parent or a plugin.",
+                "type": "string",
+                "maxLength": 63,
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+              },
+              "openshift": {
+                "description": "Allows importing into the devworkspace the OpenShift resources defined in a given manifest. For example this allows reusing the OpenShift definitions used to deploy some runtime components in production.",
+                "type": "object",
+                "oneOf": [
+                  {
+                    "required": [
+                      "uri"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "inlined"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "endpoints": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name"
+                      ],
+                      "properties": {
+                        "attributes": {
+                          "description": "Map of implementation-dependant string-based free-form attributes.\n\nExamples of Che-specific attributes:\n- cookiesAuthEnabled: \"true\" / \"false\",\n- type: \"terminal\" / \"ide\" / \"ide-dev\",",
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "exposure": {
+                          "description": "Describes how the endpoint should be exposed on the network.\n- `public` means that the endpoint will be exposed on the public network, typically through a K8S ingress or an OpenShift route.\n- `internal` means that the endpoint will be exposed internally outside of the main devworkspace POD, typically by K8S services, to be consumed by other elements running on the same cloud internal network.\n- `none` means that the endpoint will not be exposed and will only be accessible inside the main devworkspace POD, on a local address.\n\nDefault value is `public`",
+                          "type": "string",
+                          "enum": [
+                            "public",
+                            "internal",
+                            "none"
+                          ]
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 63,
+                          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                        },
+                        "path": {
+                          "description": "Path of the endpoint URL",
+                          "type": "string"
+                        },
+                        "protocol": {
+                          "description": "Describes the application and transport protocols of the traffic that will go through this endpoint.\n- `http`: Endpoint will have `http` traffic, typically on a TCP connection. It will be automaticaly promoted to `https` when the `secure` field is set to `true`.\n- `https`: Endpoint will have `https` traffic, typically on a TCP connection.\n- `ws`: Endpoint will have `ws` traffic, typically on a TCP connection. It will be automaticaly promoted to `wss` when the `secure` field is set to `true`.\n- `wss`: Endpoint will have `wss` traffic, typically on a TCP connection.\n- `tcp`: Endpoint will have traffic on a TCP connection, without specifying an application protocol.\n- `udp`: Endpoint will have traffic on an UDP connection, without specifying an application protocol.\n\nDefault value is `http`",
+                          "type": "string",
+                          "enum": [
+                            "http",
+                            "https",
+                            "ws",
+                            "wss",
+                            "tcp",
+                            "udp"
+                          ]
+                        },
+                        "secure": {
+                          "description": "Describes whether the endpoint should be secured and protected by some authentication process. This requires a protocol of `https` or `wss`.",
+                          "type": "boolean"
+                        },
+                        "targetPort": {
+                          "type": "integer"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "inlined": {
+                    "description": "Inlined manifest",
+                    "type": "string"
+                  },
+                  "uri": {
+                    "description": "Location in a file fetched from a uri.",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "volume": {
+                "description": "Allows specifying the definition of a volume shared by several other components",
+                "type": "object",
+                "properties": {
+                  "ephemeral": {
+                    "description": "Ephemeral volumes are not stored persistently across restarts. Defaults to false",
+                    "type": "boolean"
+                  },
+                  "size": {
+                    "description": "Size of the volume",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
         },
-        "attributes": {
+        "id": {
+          "description": "Id in a registry that contains a Devfile yaml file",
+          "type": "string"
+        },
+        "kubernetes": {
+          "description": "Reference to a Kubernetes CRD of type DevWorkspaceTemplate",
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "namespace": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "projects": {
+          "description": "Overrides of projects encapsulated in a parent devfile. Overriding is done according to K8S strategic merge patch standard rules.",
+          "type": "array",
+          "items": {
             "type": "object",
-            "editorFree": {
-                "type": "boolean",
-                "description": "Defines that no editor is needed and default one should not be provisioned. Defaults to `false`.",
-                "default": "false"
-            },
-            "persistVolumes": {
-                "type": "boolean",
-                "description": "Defines whether volumes should be stored or not. Defaults to `true`. In case of `false` workspace volumes will be created as `emptyDir`. The data in the `emptyDir` volume is deleted forever when a workspace Pod is removed for any reason(pod is crashed, workspace is restarted).",
-                "default": "true"
-            },
-            "additionalProperties": {
+            "required": [
+              "name"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "git"
+                ]
+              },
+              {
+                "required": [
+                  "zip"
+                ]
+              }
+            ],
+            "properties": {
+              "attributes": {
+                "description": "Map of implementation-dependant free-form YAML attributes.",
+                "type": "object",
+                "additionalProperties": true
+              },
+              "clonePath": {
+                "description": "Path relative to the root of the projects to which this project should be cloned into. This is a unix-style relative path (i.e. uses forward slashes). The path is invalid if it is absolute or tries to escape the project root through the usage of '..'. If not specified, defaults to the project name.",
                 "type": "string"
+              },
+              "git": {
+                "description": "Project's Git source",
+                "type": "object",
+                "properties": {
+                  "checkoutFrom": {
+                    "description": "Defines from what the project should be checked out. Required if there are more than one remote configured",
+                    "type": "object",
+                    "properties": {
+                      "remote": {
+                        "description": "The remote name should be used as init. Required if there are more than one remote configured",
+                        "type": "string"
+                      },
+                      "revision": {
+                        "description": "The revision to checkout from. Should be branch name, tag or commit id. Default branch is used if missing or specified revision is not found.",
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "remotes": {
+                    "description": "The remotes map which should be initialized in the git project. Must have at least one remote configured",
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "name": {
+                "description": "Project name",
+                "type": "string",
+                "maxLength": 63,
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+              },
+              "zip": {
+                "description": "Project's Zip source",
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "description": "Zip project's source location address. Should be file path of the archive, e.g. file://$FILE_PATH",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
             },
-            "javaType": "java.util.Map<String, String>"
+            "additionalProperties": false
+          }
+        },
+        "registryUrl": {
+          "description": "Registry URL to pull the parent devfile from when using id in the parent reference. To ensure the parent devfile gets resolved consistently in different environments, it is recommended to always specify the `regsitryURL` when `Id` is used.",
+          "type": "string"
+        },
+        "starterProjects": {
+          "description": "Overrides of starterProjects encapsulated in a parent devfile. Overriding is done according to K8S strategic merge patch standard rules.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "oneOf": [
+              {
+                "required": [
+                  "git"
+                ]
+              },
+              {
+                "required": [
+                  "zip"
+                ]
+              }
+            ],
+            "properties": {
+              "attributes": {
+                "description": "Map of implementation-dependant free-form YAML attributes.",
+                "type": "object",
+                "additionalProperties": true
+              },
+              "description": {
+                "description": "Description of a starter project",
+                "type": "string"
+              },
+              "git": {
+                "description": "Project's Git source",
+                "type": "object",
+                "properties": {
+                  "checkoutFrom": {
+                    "description": "Defines from what the project should be checked out. Required if there are more than one remote configured",
+                    "type": "object",
+                    "properties": {
+                      "remote": {
+                        "description": "The remote name should be used as init. Required if there are more than one remote configured",
+                        "type": "string"
+                      },
+                      "revision": {
+                        "description": "The revision to checkout from. Should be branch name, tag or commit id. Default branch is used if missing or specified revision is not found.",
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "remotes": {
+                    "description": "The remotes map which should be initialized in the git project. Must have at least one remote configured",
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "name": {
+                "description": "Project name",
+                "type": "string",
+                "maxLength": 63,
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+              },
+              "subDir": {
+                "description": "Sub-directory from a starter project to be used as root for starter project.",
+                "type": "string"
+              },
+              "zip": {
+                "description": "Project's Zip source",
+                "type": "object",
+                "properties": {
+                  "location": {
+                    "description": "Zip project's source location address. Should be file path of the archive, e.g. file://$FILE_PATH",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "uri": {
+          "description": "URI Reference of a parent devfile YAML file. It can be a full URL or a relative URI with the current devfile as the base URI.",
+          "type": "string"
+        },
+        "variables": {
+          "description": "Overrides of variables encapsulated in a parent devfile. Overriding is done according to K8S strategic merge patch standard rules.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
+      },
+      "additionalProperties": false
+    },
+    "projects": {
+      "description": "Projects worked on in the devworkspace, containing names and sources locations",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "git"
+            ]
+          },
+          {
+            "required": [
+              "zip"
+            ]
+          }
+        ],
+        "properties": {
+          "attributes": {
+            "description": "Map of implementation-dependant free-form YAML attributes.",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "clonePath": {
+            "description": "Path relative to the root of the projects to which this project should be cloned into. This is a unix-style relative path (i.e. uses forward slashes). The path is invalid if it is absolute or tries to escape the project root through the usage of '..'. If not specified, defaults to the project name.",
+            "type": "string"
+          },
+          "git": {
+            "description": "Project's Git source",
+            "type": "object",
+            "required": [
+              "remotes"
+            ],
+            "properties": {
+              "checkoutFrom": {
+                "description": "Defines from what the project should be checked out. Required if there are more than one remote configured",
+                "type": "object",
+                "properties": {
+                  "remote": {
+                    "description": "The remote name should be used as init. Required if there are more than one remote configured",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "The revision to checkout from. Should be branch name, tag or commit id. Default branch is used if missing or specified revision is not found.",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "remotes": {
+                "description": "The remotes map which should be initialized in the git project. Must have at least one remote configured",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "name": {
+            "description": "Project name",
+            "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+          },
+          "zip": {
+            "description": "Project's Zip source",
+            "type": "object",
+            "properties": {
+              "location": {
+                "description": "Zip project's source location address. Should be file path of the archive, e.g. file://$FILE_PATH",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schemaVersion": {
+      "description": "Devfile schema version",
+      "type": "string",
+      "pattern": "^2\\.1\\.0$"
+    },
+    "starterProjects": {
+      "description": "StarterProjects is a project that can be used as a starting point when bootstrapping new projects",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "git"
+            ]
+          },
+          {
+            "required": [
+              "zip"
+            ]
+          }
+        ],
+        "properties": {
+          "attributes": {
+            "description": "Map of implementation-dependant free-form YAML attributes.",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "description": {
+            "description": "Description of a starter project",
+            "type": "string"
+          },
+          "git": {
+            "description": "Project's Git source",
+            "type": "object",
+            "required": [
+              "remotes"
+            ],
+            "properties": {
+              "checkoutFrom": {
+                "description": "Defines from what the project should be checked out. Required if there are more than one remote configured",
+                "type": "object",
+                "properties": {
+                  "remote": {
+                    "description": "The remote name should be used as init. Required if there are more than one remote configured",
+                    "type": "string"
+                  },
+                  "revision": {
+                    "description": "The revision to checkout from. Should be branch name, tag or commit id. Default branch is used if missing or specified revision is not found.",
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "remotes": {
+                "description": "The remotes map which should be initialized in the git project. Must have at least one remote configured",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "name": {
+            "description": "Project name",
+            "type": "string",
+            "maxLength": 63,
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+          },
+          "subDir": {
+            "description": "Sub-directory from a starter project to be used as root for starter project.",
+            "type": "string"
+          },
+          "zip": {
+            "description": "Project's Zip source",
+            "type": "object",
+            "properties": {
+              "location": {
+                "description": "Zip project's source location address. Should be file path of the archive, e.g. file://$FILE_PATH",
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "variables": {
+      "description": "Map of key-value variables used for string replacement in the devfile. Values can can be referenced via {{variable-key}} to replace the corresponding value in string fields in the devfile. Replacement cannot be used for\n\n - schemaVersion, metadata, parent source  - element identifiers, e.g. command id, component name, endpoint name, project name  - references to identifiers, e.g. in events, a command's component, container's volume mount name  - string enums, e.g. command group kind, endpoint exposure",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
+  },
+  "additionalProperties": false
 }

@@ -1,47 +1,51 @@
----
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: toppers-atk2-rh850f1x-
+  name: toppers-atk2-rh850f1x
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: toppers-atk2-rh850f1x
-    source:
-      location: 'https://github.com/mikoto2000/toppers-atk2-sc1.git'
-      type: git
+  - git:
+      remotes:
+        origin: 'https://github.com/mikoto2000/toppers-atk2-sc1.git'
+    name: toppers-atk2-rh850f1x
+  - zip:
+      location: 'https://gist.githubusercontent.com/mikoto2000/d9403c34d61e95a404065bacf93a6626/raw/8d7a66706217547abc6acc55265251f37763a422/applications.zip'
+    name: applications
 components:
-  - type: chePlugin
-    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
-    alias: vscode-cpptools
-  - mountSources: true
-    memoryLimit: 512Mi
-    type: dockerimage
-    image: >-
-      mikoto2000/che-toppers-kernel-build-kit:athrill-gcc-latest
-    alias: toppers-kernel-build-kit
-  - mountSources: true
-    memoryLimit: 512Mi
-    type: dockerimage
-    image: 'mikoto2000/che-athrill:rh850f1x-latest'
-    alias: athrill
+  # TODO:
+  #- type: chePlugin
+  #  reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+  #  alias: vscode-cpptools
+  - container:
+      image: 'mikoto2000/che-toppers-kernel-build-kit:athrill-gcc-latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: toppers-kernel-build-kit
+  - container:
+      image: 'mikoto2000/che-athrill:rh850f1x-latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: athrill
 commands:
-  - name: create sample
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}'
-        type: exec
-        command: >-
-          mkdir ${CHE_PROJECTS_ROOT}/sample;
-          cd ${CHE_PROJECTS_ROOT}/sample;
-          ../toppers-atk2-rh850f1x/configure -T hsbrh850f1k_gcc -g /usr/local/bin/cfg
-        component: toppers-kernel-build-kit
-  - name: build sample
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/sample'
-        type: exec
-        command: make
-        component: toppers-kernel-build-kit
-  - name: run sample on athrill
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/sample'
-        type: exec
-        command: cp /opt/athrill/params/rh850f1x/atk2-sc1/* ./; athrill-run
-        component: athrill
+  - id: create-sample
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/applications'
+      commandLine: >-
+          mkdir ${PROJECTS_ROOT}/applications/sample;
+          cd ${PROJECTS_ROOT}/applications/sample;
+          ../../toppers-atk2-rh850f1x/configure -T hsbrh850f1k_gcc -g /usr/local/bin/cfg
+  - id: build-sample
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: 'make'
+  - id: run-sample-on-athrill
+    exec:
+      component: athrill
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: 'cp /opt/athrill/params/rh850f1x/atk2-sc1/* ./; athrill-run'
 

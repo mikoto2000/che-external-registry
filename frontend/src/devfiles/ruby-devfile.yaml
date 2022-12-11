@@ -1,15 +1,26 @@
 metadata:
   name: ruby
 projects:
-  - name: ruby-helloworld
-    source:
-      location: 'https://github.com/mikoto2000/ruby-helloworld.git'
-      type: git
-      branch: master
+  - git:
+      remotes:
+        origin: 'https://github.com/mikoto2000/ruby-helloworld.git'
+    name: ruby-helloworld
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 components:
-  - mountSources: true
-    memoryLimit: 512Mi
-    type: dockerimage
-    image: 'mikoto2000/che-ruby3:latest'
-    alias: ruby
-apiVersion: 1.0.0
+  - container:
+      image: 'mikoto2000/che-ruby3:latest'
+      memoryLimit: 512Mi
+      mountSources: true
+      sourceMapping: /projects
+    name: ruby
+commands:
+  - id: run-helloworld
+    exec:
+      component: ruby
+      commandLine: ruby helloworld.rb
+      workingDir: '${PROJECTS_ROOT}/ruby-helloworld'
+schemaVersion: 2.1.0

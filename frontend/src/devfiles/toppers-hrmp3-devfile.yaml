@@ -1,49 +1,78 @@
----
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: toppers-hrmp3-
+  name: toppers-hrmp3
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: toppers-hrmp3
-    source:
-      location: 'https://github.com/mikoto2000/toppers-hrmp3.git'
-      type: git
+  - git:
+      remotes:
+        origin: 'https://github.com/mikoto2000/toppers-hrmp3.git'
+    name: toppers-hrmp3
+  - zip:
+      location: 'https://gist.githubusercontent.com/mikoto2000/d9403c34d61e95a404065bacf93a6626/raw/8d7a66706217547abc6acc55265251f37763a422/applications.zip'
+    name: applications
 components:
-  - type: chePlugin
-    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
-    alias: vscode-cpptools
-  - type: dockerimage
-    alias: toppers-kernel-build-kit
-    image: mikoto2000/che-toppers-kernel-build-kit:che-zig-with-gcc-arm-none-eabi-latest
-    memoryLimit: 512Mi
-    mountSources: true
-  - type: dockerimage
-    alias: qemu-xilinx
-    image: mikoto2000/che-qemu-xilinx:latest
-    memoryLimit: 512Mi
-    mountSources: true
-  - type: dockerimage
-    alias: gdb-multiarch
-    image: mikoto2000/che-gdb-multiarch:8.2.1-2b3
-    memoryLimit: 512Mi
-    mountSources: true
+  # TODO:
+  # - type: chePlugin
+  #   reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+  #   alias: vscode-cpptools
+  - container:
+      image: 'mikoto2000/che-toppers-kernel-build-kit:che-zig-with-gcc-arm-none-eabi-latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: toppers-kernel-build-kit
+  - container:
+      image: 'mikoto2000/che-qemu-xilinx:latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: qemu-xilinx
+  - container:
+      image: 'mikoto2000/che-gdb-multiarch:8.2.1-2b3'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: gdb-multiarch
 commands:
-  - name: create sample
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}'
-        type: exec
-        command: "mkdir sample; cd sample; ruby ../toppers-hrmp3/configure.rb -T zybo_z7_gcc -w -S 'syslog.o banner.o serial.o chip_serial.o logtask.o xuartps.o'"
-        component: toppers-kernel-build-kit
-  - name: build sample
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/sample'
-        type: exec
-        command: make
-        component: toppers-kernel-build-kit
-  - name: run sample on qemu
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/sample'
-        type: exec
-        command: qemu-system-aarch64 -M arm-generic-fdt-7series -dtb /var/dts/zynq-zybo.dtb -serial null -serial mon:stdio -nographic -kernel ./hrmp
-        component: qemu-xilinx
-
+  - id: create-sample
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/applications'
+      commandLine: mkdir sample; cd sample; ruby ../../toppers-hrmp3/configure.rb -T zybo_z7_gcc -w -S 'syslog.o banner.o serial.o chip_serial.o logtask.o xuartps.o'
+  - id: build-sample
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: 'make'
+  - id: run-sample-on-qemu
+    exec:
+      component: qemu-xilinx
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: >-
+        qemu-system-aarch64
+        -M arm-generic-fdt-7series
+        -dtb /var/dts/zynq-zybo.dtb
+        -serial null
+        -serial mon:stdio
+        -nographic
+        -kernel ./hrmp
+  - id: run-sample-on-qemu-with-waiting-gdb
+    exec:
+      component: qemu-xilinx
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: >-
+        qemu-system-aarch64
+        -M arm-generic-fdt-7series
+        -dtb /var/dts/zynq-zybo.dtb
+        -serial null
+        -serial mon:stdio
+        -nographic
+        -kernel ./hrmp
+        -s -S
+  - id: attach-gdb-qemu
+    exec:
+      component: gdb-multiarch
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: 'gdb-multiarch -q ./hrmp -ex "target remote localhost:1234"'
 

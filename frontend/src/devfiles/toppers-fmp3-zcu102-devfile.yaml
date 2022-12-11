@@ -1,50 +1,85 @@
----
-apiVersion: 1.0.0
+schemaVersion: 2.1.0
 metadata:
-  generateName: toppers-fmp3-zcu102-
+  name: toppers-fmp3-zcu102
+attributes:
+  controller.devfile.io/devworkspace-config:
+    name: devworkspace-config
+    namespace: crw
+  controller.devfile.io/storage-type: ephemeral
 projects:
-  - name: toppers-fmp3-zcu102
-    source:
-      location: 'https://github.com/mikoto2000/toppers-fmp3.git'
-      branch: zcu102
-      type: git
+  - git:
+      remotes:
+        origin: 'https://github.com/mikoto2000/toppers-fmp3.git'
+      checkoutFrom:
+        remote: origin
+        revision: zcu102
+    name: toppers-fmp3-zcu102
+  - zip:
+      location: 'https://gist.githubusercontent.com/mikoto2000/d9403c34d61e95a404065bacf93a6626/raw/8d7a66706217547abc6acc55265251f37763a422/applications.zip'
+    name: applications
 components:
-  - type: chePlugin
-    reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
-    alias: vscode-cpptools
-  - type: dockerimage
-    alias: toppers-kernel-build-kit
-    image: mikoto2000/che-toppers-kernel-build-kit:gcc-aarch64-linux-gnu-latest
-    memoryLimit: 512Mi
-    mountSources: true
-  - type: dockerimage
-    alias: qemu-xilinx
-    image: mikoto2000/che-qemu-xilinx:latest
-    memoryLimit: 512Mi
-    mountSources: true
-  - type: dockerimage
-    alias: gdb-multiarch
-    image: mikoto2000/che-gdb-multiarch:8.2.1-2b3
-    memoryLimit: 512Mi
-    mountSources: true
+  # TODO:
+  # - type: chePlugin
+  #   reference: https://mikoto2000.github.io/che-external-registry/plugins/vscode-cpptools-meta.yaml
+  #   alias: vscode-cpptools
+  - container:
+      image: 'mikoto2000/che-toppers-kernel-build-kit:gcc-aarch64-linux-gnu-latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: toppers-kernel-build-kit
+  - container:
+      image: 'mikoto2000/che-qemu-xilinx:latest'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: qemu-xilinx
+  - container:
+      image: 'mikoto2000/che-gdb-multiarch:8.2.1-2b3'
+      memoryLimit: 512Mi
+      mountSources: true
+    name: gdb-multiarch
 commands:
-  - name: create sample
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}'
-        type: exec
-        command: "mkdir sample; cd sample; ruby ../toppers-fmp3-zcu102/configure.rb -T zcu102_arm64_gcc -w -S 'syslog.o banner.o serial.o chip_serial.o logtask.o xuartps.o'"
-        component: toppers-kernel-build-kit
-  - name: build sample
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/sample'
-        type: exec
-        command: make GCC_TARGET=aarch64-linux-gnu
-        component: toppers-kernel-build-kit
-  - name: run sample on qemu
-    actions:
-      - workdir: '${CHE_PROJECTS_ROOT}/sample'
-        type: exec
-        command: qemu-system-aarch64 -M arm-generic-fdt -nographic -serial mon:stdio -dtb /var/dts/LATEST/SINGLE_ARCH/zcu102-arm.dtb -device loader,file=./fmp,cpu-num=0 -device loader,addr=0xfd1a0104,data=0x8000000e,data-len=4
-        component: qemu-xilinx
-
-
+  - id: create-sample
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/applications'
+      commandLine: >-
+          mkdir ${PROJECTS_ROOT}/applications/sample;
+          cd ${PROJECTS_ROOT}/applications/sample;
+          ruby ../../toppers-fmp3-zcu102/configure.rb -T zcu102_arm64_gcc -w -S 'syslog.o banner.o serial.o chip_serial.o logtask.o xuartps.o'
+  - id: build-sample
+    exec:
+      component: toppers-kernel-build-kit
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: 'make GCC_TARGET=aarch64-linux-gnu'
+  - id: run-sample-on-qemu
+    exec:
+      component: qemu-xilinx
+      workingDir: '${PROJECTS_ROOT}/applications/sample'
+      commandLine: >-
+        qemu-system-aarch64
+        -M arm-generic-fdt
+        -nographic
+        -serial mon:stdio
+        -dtb /var/dts/LATEST/SINGLE_ARCH/zcu102-arm.dtb
+        -device loader,file=./fmp,cpu-num=0
+        -device loader,addr=0xfd1a0104,data=0x8000000e,data-len=4
+  # TODO: aarch64 対応の gdb を用意する
+  #- id: run-sample-on-qemu-with-waiting-gdb
+  #  exec:
+  #    component: qemu-xilinx
+  #    workingDir: '${PROJECTS_ROOT}/applications/sample'
+  #    commandLine: >-
+  #      qemu-system-aarch64
+  #      -M arm-generic-fdt
+  #      -nographic
+  #      -serial mon:stdio
+  #      -dtb /var/dts/LATEST/SINGLE_ARCH/zcu102-arm.dtb
+  #      -device loader,file=./fmp,cpu-num=4
+  #      -device loader,addr=0xff5e023c,data=0x80008fde,data-len=4
+  #      -device loader,addr=0xff9a000,data=0x8000218,data-len=4
+  #      -s -S
+  #- id: attach-gdb-qemu
+  #  exec:
+  #    component: gdb-multiarch
+  #    workingDir: '${PROJECTS_ROOT}/applications/sample'
+  #    commandLine: 'gdb-multiarch -q ./fmp -ex "target remote localhost:1234"'

@@ -48,8 +48,8 @@
     "url": "/devfiles/node16-devfile.yaml"
   },
   {
-    "name": "vim",
-    "url": "/devfiles/vim-devfile.yaml"
+    "name": "Rust",
+    "url": "/devfiles/rust-devfile.yaml"
   }
 ]
 
