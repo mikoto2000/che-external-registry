@@ -37,6 +37,10 @@ default_che_base_url =
     openshift_base_url
 
 
+default_che_editor =
+    "eclipse/che-theia/latest"
+
+
 che_path =
     "f"
 
@@ -44,6 +48,9 @@ che_path =
 che_query_string_prefix =
     "?url="
 
+
+che_editor_string_prefix =
+    "&che-editor="
 
 type alias Stack =
     { name : String
@@ -105,7 +112,7 @@ update msg model =
             case result of
                 Ok sha256 ->
                     let
-                        url = model.che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ model.location_origin ++ "/tempfiles/" ++ sha256
+                        url = model.che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ model.location_origin ++ "/tempfiles/" ++ sha256 ++ che_editor_string_prefix ++ default_che_editor
                     in
                         ( model, Browser.Navigation.load url )
 
@@ -175,7 +182,7 @@ view model =
 to_table_column : String -> String -> Stack -> Html Msg
 to_table_column location_origin che_base_url stack =
     tr []
-        [ td [] [ a [ href (che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ location_origin ++ stack.url), title (che_base_url ++ " で開く") ] [ text stack.name ] ]
+        [ td [] [ a [ href (che_base_url ++ "/" ++ che_path ++ che_query_string_prefix ++ location_origin ++ stack.url ++ che_editor_string_prefix ++ default_che_editor), title (che_base_url ++ " で開く") ] [ text stack.name ] ]
         , td [] [ a [ href stack.url, title "devfile" ] [ text "⚙" ] ]
         , td [] [ a [ id "edit_button", title "devfile を編集", onClick (EditDevfile stack.url), style "cursor" "pointer"] [ text "📝" ] ]
         ]
