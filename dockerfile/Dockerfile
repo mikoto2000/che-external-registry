@@ -9,5 +9,12 @@ RUN apk update \
 
 COPY ./backend/target/che-external-registry-0.0.1-SNAPSHOT.jar /
 
-CMD ["java", "-Dserver.port=${PORT}", "-jar", "/che-external-registry-0.0.1-SNAPSHOT.jar"]
+# CDS ファイル作成
+RUN timeout -s INT 5 java -XX:ArchiveClassesAtExit=cds.jsa -jar "/che-external-registry-0.0.1-SNAPSHOT.jar"; true
+
+# 最適化コンパイラを OFF
+ENV JAVA_TOOL_OPTIONS "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+
+# CDS を有効にして実行
+CMD ["java", "-XX:SharedArchiveFile=cds.jsa", "-Dserver.port=${PORT}", "-jar", "/che-external-registry-0.0.1-SNAPSHOT.jar"]
 
