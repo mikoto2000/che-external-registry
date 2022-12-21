@@ -13,15 +13,11 @@ rm -rf ../backend/src/main/resources/static/*
 cp -r ./dist/* ../backend/src/main/resources/static
 
 
-## backend のビルド
+## backend Docker イメージのビルド
 cd ${SCRIPT_DIR}/backend
 #./mvnw spring-boot:run
-./mvnw clean package
-
-
-## Docker イメージのビルド
-cd ${SCRIPT_DIR}
-docker build -t mikoto2000/che-external-registry -f ./dockerfile/Dockerfile .
+./mvnw -Pnative clean spring-boot:build-image \
+    -Dspring-boot.build-image.imageName=mikoto2000/che-external-registry:latest
 # docker push mikoto2000/che-external-registry:latest
 
 
